@@ -4,7 +4,7 @@ import {IPoint} from "../../interfaces/IPoint";
 import {CanvasUtil} from "../../utils/CanvasUtil";
 import {store} from "../../index";
 import {ImageData, LabelPoint} from "../../store/labels/types";
-import uuidv4 from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import {
     updateActiveLabelId,
     updateFirstLabelCreatedFlag,

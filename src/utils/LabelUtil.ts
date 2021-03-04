@@ -1,5 +1,5 @@
 import {LabelName, LabelPolygon, LabelRect} from "../store/labels/types";
-import uuidv4 from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import {find} from "lodash";
 import {IRect} from "../interfaces/IRect";
 import {LabelStatus} from "../data/enums/LabelStatus";

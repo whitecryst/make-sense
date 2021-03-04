@@ -1,7 +1,7 @@
 import {ImageData, LabelName} from "../../../store/labels/types";
 import {LabelsSelector} from "../../../store/selectors/LabelsSelector";
 import {COCOCategory, COCOImage, COCOObject} from "../../../data/labels/COCO";
-import uuidv4 from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import {ArrayUtil, PartitionResult} from "../../../utils/ArrayUtil";
 import {ImageDataUtil} from "../../../utils/ImageDataUtil";
 import {LabelUtil} from "../../../utils/LabelUtil";

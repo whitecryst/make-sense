@@ -12,6 +12,7 @@ import {updateActivePopupType, updateProjectData} from "../../../store/general/a
 import {AcceptedFileType} from "../../../data/enums/AcceptedFileType";
 import {ProjectData} from "../../../store/general/types";
 import {ImageDataUtil} from "../../../utils/ImageDataUtil";
+import { sizeHeight } from "@material-ui/system";
 
 interface IProps {
     updateActiveImageIndex: (activeImageIndex: number) => any;
@@ -35,7 +36,91 @@ const ImagesDropZone: React.FC<IProps> = ({updateActiveImageIndex, addImageData,
             updateActiveImageIndex(0);
             addImageData(acceptedFiles.map((fileData:File) => ImageDataUtil.createImageDataFromFileData(fileData)));
             updateActivePopupType(PopupWindowType.INSERT_LABEL_NAMES);
+            while( acceptedFiles.length > 0) {
+                acceptedFiles.pop();
+            }
         }
+    };
+
+    const loadDefaultImages = async () => {
+        
+        const response = await fetch('/images/test2.jpg');
+        const body = await response.blob();
+        
+        var b: any = body;
+        //A Blob() is almost a File() - it's just missing the two properties below which we will add
+        b.lastModifiedDate = new Date();
+        b.name = "test.jpg";
+        //Cast to a File() type
+        acceptedFiles.push(b);
+        console.log(b);
+        //let image = ImageDataUtil.createImageDataFromFileData(b);
+        
+        //addImageData([image]);
+        //console.log(image);
+    
+        
+    };
+
+    const loadImagesFromGoogleSheets = async () => {
+        console.log("try to connect to google sheets");
+        const { GoogleSpreadsheet } = require('google-spreadsheet');
+
+        const creds = require('../../../googleSheetCredentials.json'); // the file saved above
+        
+        // Initialize the sheet - doc ID is the long id in the sheets URL
+        const doc = new GoogleSpreadsheet('17Mdd7GZFlaZ169M7bJqiUf5WV437MCZ25_Hw9fgfJF8');
+        
+        await doc.useServiceAccountAuth(creds);
+
+        await doc.loadInfo(); // loads document properties and worksheets
+        console.log(doc.title);
+    
+        const sheet = doc.sheetsByTitle['ImageSeriesContent']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+        const numrows = sheet.rowCount;
+        console.log(sheet.title);
+        console.log( numrows );
+        
+        // read cells
+        await sheet.loadCells('A1:D'+sheet.rowCount);
+
+        // read/write row values
+        let images = [];
+        for (var i = 1; i < 2; i++) { // numrows
+            let imageId = sheet.getCell(0, i).value+'_'+sheet.getCell(1, i).value;
+            let imageUrl = sheet.getCell(i, 3);     
+            console.log( "download image: "+imageUrl ); 
+            console.log(imageUrl);
+            
+            //let blob = await fetch(imageUrl).then(r => r.blob());
+            let blob = await fetch(imageUrl
+                , { // Your POST endpoint
+                    method: 'POST',
+                    headers: {
+                    // Content-Type may need to be completely **omitted**
+                    // or you may need something
+                    "Content-Type": "You will perhaps need to define a content-type here"
+                    }
+                }).then(
+                    response => response.blob() // if the response is a JSON object
+                ).then(
+                    success => console.log(success) // Handle the success response object
+                ).catch(
+                    error => console.log(error) // Handle the error response object
+            );
+            
+
+            var b: any = blob;
+            //A Blob() is almost a File() - it's just missing the two properties below which we will add
+            b.lastModifiedDate = new Date();
+            b.name = imageId;
+            //Cast to a File() type
+            acceptedFiles.push(b);
+        }
+        
+    
+        //addImageData(images.map((fileData:File) => ImageDataUtil.createImageDataFromFileData(fileData)));
+  
     };
 
     const getDropZoneContent = () => {
@@ -50,6 +135,12 @@ const ImagesDropZone: React.FC<IProps> = ({updateActiveImageIndex, addImageData,
                 <p className="extraBold">Drop images</p>
                 <p>or</p>
                 <p className="extraBold">Click here to select them</p>
+                <p>or</p>
+                <TextButton
+                    label={"Load default"}
+                    isDisabled={!acceptedFiles.length}
+                    onClick={() => loadDefaultImages()}
+                />    
             </>;
         else if (acceptedFiles.length === 1)
             return <>

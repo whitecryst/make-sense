@@ -1,5 +1,5 @@
-import * as cocoSsd from '@tensorflow-models/coco-ssd';
-import {DetectedObject, ObjectDetection} from '@tensorflow-models/coco-ssd';
+//import * as cocoSsd from '@tensorflow-models/coco-ssd';
+//import {DetectedObject, ObjectDetection} from '@tensorflow-models/coco-ssd';
 import {store} from "../index";
 import {updateObjectDetectorStatus} from "../store/ai/actionCreators";
 import {LabelType} from "../data/enums/LabelType";
@@ -8,10 +8,10 @@ import {AIObjectDetectionActions} from "../logic/actions/AIObjectDetectionAction
 import {updateActiveLabelType} from "../store/labels/actionCreators";
 
 export class ObjectDetector {
-    private static model: ObjectDetection;
+   // private static model: ObjectDetection;
 
     public static loadModel(callback?: () => any) {
-        cocoSsd
+        /*cocoSsd
             .load()
             .then((model: ObjectDetection) => {
                 ObjectDetector.model = model;
@@ -24,11 +24,11 @@ export class ObjectDetector {
             .catch((error) => {
                 // TODO
                 throw new Error(error);
-            })
+            })*/
     }
 
-    public static predict(image: HTMLImageElement, callback?: (predictions: DetectedObject[]) => any) {
-        if (!ObjectDetector.model) return;
+    public static predict(image: HTMLImageElement, callback?: (predictions: Object[]) => any) {
+        /*if (!ObjectDetector.model) return;
 
         ObjectDetector.model
             .detect(image)
@@ -38,6 +38,7 @@ export class ObjectDetector {
             .catch((error) => {
                 // TODO
                 throw new Error(error);
-            })
+            })*/
+        return [];
     }
 }

@@ -10,7 +10,7 @@ import Scrollbars from 'react-custom-scrollbars';
 import {LabelName} from "../../../store/labels/types";
 import {updateLabelNames} from "../../../store/labels/actionCreators";
 import {LabelsSelector} from "../../../store/selectors/LabelsSelector";
-import uuidv4 from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 
 interface SelectableName {
     name: string;

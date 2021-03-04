@@ -9,7 +9,7 @@ import { connect } from "react-redux";
 import Scrollbars from 'react-custom-scrollbars';
 import TextInput from "../../Common/TextInput/TextInput";
 import { ImageButton } from "../../Common/ImageButton/ImageButton";
-import uuidv4 from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { LabelName } from "../../../store/labels/types";
 import { LabelUtil } from "../../../utils/LabelUtil";
 import { LabelsSelector } from "../../../store/selectors/LabelsSelector";

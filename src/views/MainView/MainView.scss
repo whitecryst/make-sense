@@ -19,7 +19,7 @@
     .LeftColumn {
       width: 280px;
       height: 100%;
-      transition: width 1.2s ease-out;
+      transition: width 0.2s ease-out;
     }
 
     .Slider {
@@ -27,16 +27,16 @@
     }
 
     #lower {
-      transition: width 1.5s ease-out;
+      transition: width 0.5s ease-out;
     }
 
     #upper {
-      transition: width 1.4s ease-out;
+      transition: width 0.4s ease-out;
     }
 
     .RightColumn {
       .ImagesDropZone {
-        animation-duration: 1.5s;
+        animation-duration: 0.5s;
         animation-name: cssAnimationShow;
         animation-fill-mode: forwards;
       }
@@ -57,7 +57,8 @@
         bottom: 20px;
 
         &:hover {
-          background-color: white;
+          background-color: $secondaryColor;
+          box-shadow: $secondaryColor 0 0 0 2px inset;
           color: black;
         }
       }
@@ -75,7 +76,7 @@
 
     .LeftColumn {
       .EditorFeaturesWrapper {
-        animation-duration: 1.5s;
+        animation-duration: 0.5s;
         animation-name: cssAnimationShow;
         animation-fill-mode: forwards;
       }
@@ -87,13 +88,13 @@
   position: absolute;
   top: 0;
   left: 0;
-  background-color: rgba(0, 0, 0, 0.3);
+  background-color: rgba(0, 0, 0, 0.0);
   z-index: 0;
   width: 75%;
   height: 100%;
 
   .TriangleVerticalContent{
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.0);
   }
 }
 
@@ -107,7 +108,13 @@
 
 .LeftColumn {
   position: relative;
-  background-color: $darkThemeFirstColor;
+  background-color: whitesmoke;
+// for background image
+  height: 100%;
+  background-position: left;
+  background-repeat: no-repeat;
+  background-size: cover;
+  // bg image end
   padding: 20px;
   z-index: 100;
 

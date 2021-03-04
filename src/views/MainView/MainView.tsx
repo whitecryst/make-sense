@@ -44,7 +44,7 @@ const MainView: React.FC = () => {
     }))(Tooltip);
 
     const getSocialMediaButtons = (size:ISize) => {
-        return SocialMediaData.map((data:ISocialMedia, index: number) => {
+        /*return SocialMediaData.map((data:ISocialMedia, index: number) => {
             return <DarkTooltip
                 key={index}
                 disableFocusListener
@@ -62,7 +62,8 @@ const MainView: React.FC = () => {
                     />
                 </div>
             </DarkTooltip>
-        });
+        });*/
+        return "";
     };
 
     const getEditorFeatureTiles = () => {
@@ -100,17 +101,13 @@ const MainView: React.FC = () => {
                     <div className="TriangleVerticalContent"/>
                 </div>
             </div>
-
-            <div className="LeftColumn">
+            
+            <div className="LeftColumn" style={{ backgroundImage: "url(/chinese3.jpg)" }}>
                 <div className={"LogoWrapper"}>
-                    <img
-                        draggable={false}
-                        alt={"main-logo"}
-                        src={"ico/main-image-color.png"}
-                    />
+                    
                 </div>
                 <div className="EditorFeaturesWrapper">
-                    {getEditorFeatureTiles()}
+                    
                 </div>
                 <div className="TriangleVertical">
                     <div className="TriangleVerticalContent"/>
