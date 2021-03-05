@@ -16,6 +16,11 @@ import {ContextType} from "../../../data/enums/ContextType";
 import EditorBottomNavigationBar from "../EditorBottomNavigationBar/EditorBottomNavigationBar";
 import EditorTopNavigationBar from "../EditorTopNavigationBar/EditorTopNavigationBar";
 import {ProjectType} from "../../../data/enums/ProjectType";
+//---- for filemanager
+import ReactDOM from 'react-dom';
+import { FileManager, FileNavigator } from '@opuscapita/react-filemanager';
+import connectorNodeV1 from '@opuscapita/react-filemanager-connector-node-v1';
+// filemanager end
 
 interface IProps {
     windowSize: ISize;
@@ -33,15 +38,17 @@ const EditorContainer: React.FC<IProps> = (
         activeContext,
         projectType
     }) => {
-    const [leftTabStatus, setLeftTabStatus] = useState(true);
+    const [leftTabStatusImages, setLeftTabStatusImages] = useState(true);
+    const [leftTabStatusFolders, setLeftTabStatusFolders] = useState(true);
     const [rightTabStatus, setRightTabStatus] = useState(true);
 
     const calculateEditorSize = (): ISize => {
         if (windowSize) {
-            const leftTabWidth = leftTabStatus ? Settings.SIDE_NAVIGATION_BAR_WIDTH_OPEN_PX : Settings.SIDE_NAVIGATION_BAR_WIDTH_CLOSED_PX;
+            const leftTabWidthImages = leftTabStatusImages ? Settings.SIDE_NAVIGATION_BAR_WIDTH_OPEN_PX : Settings.SIDE_NAVIGATION_BAR_WIDTH_CLOSED_PX;
+            const leftTabWidthFolders = leftTabStatusFolders ? Settings.SIDE_NAVIGATION_BAR_FOLDERS_WIDTH_OPEN_PX : Settings.SIDE_NAVIGATION_BAR_WIDTH_CLOSED_PX;
             const rightTabWidth = rightTabStatus ? Settings.SIDE_NAVIGATION_BAR_WIDTH_OPEN_PX : Settings.SIDE_NAVIGATION_BAR_WIDTH_CLOSED_PX;
             return {
-                width: windowSize.width - leftTabWidth - rightTabWidth,
+                width: windowSize.width - leftTabWidthImages - leftTabWidthFolders - rightTabWidth,
                 height: windowSize.height - Settings.TOP_NAVIGATION_BAR_HEIGHT_PX
                     - Settings.EDITOR_BOTTOM_NAVIGATION_BAR_HEIGHT_PX - Settings.EDITOR_TOP_NAVIGATION_BAR_HEIGHT_PX,
             }
@@ -50,29 +57,69 @@ const EditorContainer: React.FC<IProps> = (
             return null;
     };
 
-    const leftSideBarButtonOnClick = () => {
-        if (!leftTabStatus)
-            ContextManager.switchCtx(ContextType.LEFT_NAVBAR);
-        else if (leftTabStatus && activeContext === ContextType.LEFT_NAVBAR)
+    const leftSideBarImageButtonOnClick = () => {
+        if (!leftTabStatusImages)
+            ContextManager.switchCtx(ContextType.LEFT_NAVBAR_IMAGES);
+        else if (leftTabStatusImages && activeContext === ContextType.LEFT_NAVBAR_IMAGES)
             ContextManager.restoreCtx();
 
-        setLeftTabStatus(!leftTabStatus);
+        setLeftTabStatusImages(!leftTabStatusImages);
+    };
+
+    const leftSideBarFoldersButtonOnClick = () => {
+        if (!leftTabStatusFolders)
+            ContextManager.switchCtx(ContextType.LEFT_NAVBAR_FOLDERS);
+        else if (leftTabStatusFolders && activeContext === ContextType.LEFT_NAVBAR_FOLDERS)
+            ContextManager.restoreCtx();
+
+        setLeftTabStatusFolders(!leftTabStatusFolders);
     };
 
     const leftSideBarCompanionRender = () => {
         return <>
+           <VerticalEditorButton
+                label="Folders"
+                image={"/ico/files.png"}
+                imageAlt={"folders"}
+                onClick={leftSideBarFoldersButtonOnClick}
+                isActive={leftTabStatusFolders}
+            />
             <VerticalEditorButton
                 label="Images"
                 image={"/ico/camera.png"}
                 imageAlt={"images"}
-                onClick={leftSideBarButtonOnClick}
-                isActive={leftTabStatus}
+                onClick={leftSideBarImageButtonOnClick}
+                isActive={leftTabStatusImages}
             />
+            
         </>
     };
 
-    const leftSideBarRender = () => {
+    const leftSideBarRenderImages = () => {
         return <ImagesList/>
+    };
+
+    const leftSideBarRenderFolders = () => {
+        const apiOptions = {
+          ...connectorNodeV1.apiOptions,
+          apiRoot: `http://localhost:3001` // Or you local Server Node V1 installation.
+        }
+        
+        const fileManager = (
+         <div style={{ height: '100%', width: '500px', background: '#171717' }}>
+            <FileManager>
+              <FileNavigator
+                id="filemanager-1"
+                api={connectorNodeV1.api}
+                apiOptions={apiOptions}
+                capabilities={connectorNodeV1.capabilities}
+                listViewLayout={connectorNodeV1.listViewLayout}
+                viewLayoutOptions={connectorNodeV1.viewLayoutOptions}
+              />
+            </FileManager>
+          </div>
+        );
+        return fileManager;
     };
 
     const rightSideBarButtonOnClick = () => {
@@ -104,12 +151,22 @@ const EditorContainer: React.FC<IProps> = (
         <div className="EditorContainer">
             <SideNavigationBar
                 direction={Direction.LEFT}
-                isOpen={leftTabStatus}
-                isWithContext={activeContext === ContextType.LEFT_NAVBAR}
+                isOpen={leftTabStatusFolders}
+                isWithContext={activeContext === ContextType.LEFT_NAVBAR_FOLDERS}
                 renderCompanion={leftSideBarCompanionRender}
-                renderContent={leftSideBarRender}
-                key="left-side-navigation-bar"
+                renderContent={leftSideBarRenderFolders}
+                key="left-side-navigation-bar-folders"
             />
+            <SideNavigationBar
+                direction={Direction.LEFT}
+                isOpen={leftTabStatusImages}
+                isWithContext={activeContext === ContextType.LEFT_NAVBAR_IMAGES}
+                //renderCompanion={leftSideBarCompanionRender}
+                renderContent={leftSideBarRenderImages}
+                key="left-side-navigation-bar-images"
+                
+            />
+
             <div className="EditorWrapper"
                 onMouseDown={() => ContextManager.switchCtx(ContextType.EDITOR)}
                  key="editor-wrapper"

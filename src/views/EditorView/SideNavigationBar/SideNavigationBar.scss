@@ -31,7 +31,7 @@
   .NavigationBarContentWrapper {
     align-self: stretch;
     min-width: $sideNavigationBarContentWidth;
-    width: $sideNavigationBarContentWidth;
+    //width: $sideNavigationBarContentWidth;
     flex-direction: column;
     display: flex;
     flex-wrap: nowrap;

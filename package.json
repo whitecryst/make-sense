@@ -5,6 +5,8 @@
   "proxy": "http://localhost:3001",
   "dependencies": {
     "@material-ui/core": "^4.11.3",
+    "@opuscapita/react-filemanager": "^1.1.4",
+    "@opuscapita/react-filemanager-connector-node-v1": "^1.1.4",
     "@tensorflow-models/posenet": "^2.2.1",
     "@tensorflow/tfjs": "^2.x",
     "@types/jest": "26.0.20",

@@ -99,7 +99,7 @@ class ImagesList extends React.Component<IProps, IState> {
             <div
                 className="ImagesList"
                 ref={ref => this.imagesListRef = ref}
-                onClick={() => ContextManager.switchCtx(ContextType.LEFT_NAVBAR)}
+                onClick={() => ContextManager.switchCtx(ContextType.LEFT_NAVBAR_IMAGES)}
             >
                 {!!size && <VirtualList
                     size={size}

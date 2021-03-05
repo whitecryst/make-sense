@@ -42,12 +42,7 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
                         className="Header"
                         onClick={() => updateActivePopupType(PopupWindowType.EXIT_PROJECT)}
                     >
-                        <img
-                            draggable={false}
-                            alt={"make-sense"}
-                            src={"/make-sense-ico-transparent.png"}
-                        />
-                        Make Sense
+                        KtK-CommandBridge
                     </div>
                 </div>
                 <div className="NavigationBarGroupWrapper">

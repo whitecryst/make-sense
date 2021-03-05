@@ -10,7 +10,6 @@ import {Tooltip} from "@material-ui/core";
 import Fade from "@material-ui/core/Fade";
 import withStyles from "@material-ui/core/styles/withStyles";
 import ImagesDropZone from "./ImagesDropZone/ImagesDropZone";
-
 const MainView: React.FC = () => {
     const [projectInProgress, setProjectInProgress] = useState(false);
     const [projectCanceled, setProjectCanceled] = useState(false);
@@ -32,6 +31,8 @@ const MainView: React.FC = () => {
             }
         );
     };
+
+    
 
     const DarkTooltip = withStyles(theme => ({
         tooltip: {

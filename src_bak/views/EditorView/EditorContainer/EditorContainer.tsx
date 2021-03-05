@@ -68,6 +68,13 @@ const EditorContainer: React.FC<IProps> = (
                 onClick={leftSideBarButtonOnClick}
                 isActive={leftTabStatus}
             />
+            <VerticalEditorButton
+                label="Folders"
+                image={"/ico/files.png"}
+                imageAlt={"folders"}
+                onClick={}
+                isActive={leftTabStatus}
+            />
         </>
     };
 
