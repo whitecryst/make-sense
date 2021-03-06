@@ -28,18 +28,19 @@ const ImagesDropZone: React.FC<IProps> = ({updateActiveImageIndex, addImageData,
     } as DropzoneOptions);
 
     const startEditor = (projectType: ProjectType) => {
-        if (acceptedFiles.length > 0) {
+       
             updateProjectData({
                 ...projectData,
                 type: projectType
             });
+        if (acceptedFiles.length > 0) {
             updateActiveImageIndex(0);
             addImageData(acceptedFiles.map((fileData:File) => ImageDataUtil.createImageDataFromFileData(fileData)));
             updateActivePopupType(PopupWindowType.INSERT_LABEL_NAMES);
             while( acceptedFiles.length > 0) {
                 acceptedFiles.pop();
             }
-        }
+       }
     };
 
     const loadDefaultImages = async () => {
@@ -54,12 +55,6 @@ const ImagesDropZone: React.FC<IProps> = ({updateActiveImageIndex, addImageData,
         //Cast to a File() type
         acceptedFiles.push(b);
         console.log(b);
-        //let image = ImageDataUtil.createImageDataFromFileData(b);
-        
-        //addImageData([image]);
-        //console.log(image);
-    
-        
     };
 
     const loadImagesFromGoogleSheets = async () => {
@@ -135,12 +130,6 @@ const ImagesDropZone: React.FC<IProps> = ({updateActiveImageIndex, addImageData,
                 <p className="extraBold">Drop images</p>
                 <p>or</p>
                 <p className="extraBold">Click here to select them</p>
-                <p>or</p>
-                <TextButton
-                    label={"Load default"}
-                    isDisabled={!acceptedFiles.length}
-                    onClick={() => loadDefaultImages()}
-                />    
             </>;
         else if (acceptedFiles.length === 1)
             return <>
@@ -172,12 +161,12 @@ const ImagesDropZone: React.FC<IProps> = ({updateActiveImageIndex, addImageData,
             <div className="DropZoneButtons">
                 <TextButton
                     label={"Object Detection"}
-                    isDisabled={!acceptedFiles.length}
+                    isDisabled={false}
                     onClick={() => startEditor(ProjectType.OBJECT_DETECTION)}
                 />
                 <TextButton
                     label={"Image recognition"}
-                    isDisabled={!acceptedFiles.length}
+                    isDisabled={false}
                     onClick={() => startEditor(ProjectType.IMAGE_RECOGNITION)}
                 />
             </div>

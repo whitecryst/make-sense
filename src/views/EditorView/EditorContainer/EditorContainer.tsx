@@ -17,8 +17,9 @@ import EditorBottomNavigationBar from "../EditorBottomNavigationBar/EditorBottom
 import EditorTopNavigationBar from "../EditorTopNavigationBar/EditorTopNavigationBar";
 import {ProjectType} from "../../../data/enums/ProjectType";
 //---- for filemanager
-import ReactDOM from 'react-dom';
-import { FileManager, FileNavigator } from '@opuscapita/react-filemanager';
+//import ReactDOM from 'react-dom';
+//import { FileManager, FileNavigator } from '@opuscapita/react-filemanager';
+import { FileManager, FileNavigator } from "../../../filemanager";
 import connectorNodeV1 from '@opuscapita/react-filemanager-connector-node-v1';
 // filemanager end
 
