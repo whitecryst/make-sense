@@ -1,5 +1,5 @@
 import React from 'react';
-import './LoadingCell.less';
+import './LoadingCell.css';
 
 const lc = () => (
   <div className="oc-fm--loading-cell">

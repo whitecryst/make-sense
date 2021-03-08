@@ -1,5 +1,5 @@
 import React from 'react';
-import './Cell.less';
+import './Cell.css';
 import LoadingCell from '../LoadingCell';
 
 const cell = (viewLayoutOptions) => (cellProps) => {

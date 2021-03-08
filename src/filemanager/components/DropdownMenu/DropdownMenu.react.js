@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component, Children } from 'react';
-import './DropdownMenu.less';
+import './DropdownMenu.css';
 import clickOutside from 'react-click-outside';
 
 const propTypes = {

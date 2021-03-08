@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import './LocationBar.less';
-import Svg from '@opuscapita/react-svg';
+import './LocationBar.css';
+import {SVG} from '@opuscapita/react-svg';
 const arrowIcon = require('@opuscapita/svg-icons/lib/keyboard_arrow_right.svg');
 
 const propTypes = {
@@ -38,7 +38,7 @@ class LocationBar extends Component {
 
     const itemsElement = items.map((item, i) => {
       const arrow = i < items.length - 1 ? (
-        <Svg className="oc-fm--location-bar__item-arrow" svg={arrowIcon} />
+        <SVG className="oc-fm--location-bar__item-arrow" svg={arrowIcon} />
       ) : null;
 
       return (

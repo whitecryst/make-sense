@@ -18,12 +18,12 @@ const connectors = {
 
 function requireAll(requireContext) {
   return requireContext.keys().map(key => ({
-    name: key.replace(/(\.less$|^\.\/)/gi, ''),
+    name: key.replace(/(\.css$|^\.\/)/gi, ''),
     css: requireContext(key)
   }));
 }
 
-const themes = requireAll(require.context('../themes', true, /.*\.less$/));
+const themes = requireAll(require.context('../themes', true, /.*\.css$/));
 
 @showroomScopeDecorator
 export default

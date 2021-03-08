@@ -21,9 +21,9 @@ DropdownMenu is
   
     <DropdownMenuItem
       icon={{
-        svg: `<svg viewBox="0 0 120 120" version="1.1">
+        svg: `<SVG viewBox="0 0 120 120" version="1.1">
           <circle cx="60" cy="60" r="50"/>
-        </svg>`, 
+        </SVG>`, 
         fill: 'rgba(0, 0, 0, 0.72)' 
       }}
     >
@@ -32,9 +32,9 @@ DropdownMenu is
     
     <DropdownMenuItem
       icon={{
-        svg: `<svg viewBox="0 0 120 120" version="1.1">
+        svg: `<SVG viewBox="0 0 120 120" version="1.1">
           <circle cx="60" cy="60" r="50"/>
-        </svg>`, 
+        </SVG>`, 
         fill: 'rgba(0, 0, 0, 0.72)' 
       }}
     >
@@ -43,9 +43,9 @@ DropdownMenu is
     
     <DropdownMenuItem
       icon={{
-        svg: `<svg viewBox="0 0 120 120" version="1.1">
+        svg: `<SVG viewBox="0 0 120 120" version="1.1">
           <circle cx="60" cy="60" r="50"/>
-        </svg>`, 
+        </SVG>`, 
         fill: 'rgba(0, 0, 0, 0.72)' 
       }}
     >

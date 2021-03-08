@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import './SetNameDialog.less';
+import './SetNameDialog.css';
 import Dialog from '../Dialog';
 
 const propTypes = {

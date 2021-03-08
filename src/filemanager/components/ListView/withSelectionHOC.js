@@ -1,7 +1,7 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { findIndex } from 'lodash';
-import './withSelectionHOC.less';
+import './withSelectionHOC.css';
 
 import {
   noop,

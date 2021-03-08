@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component, Children } from 'react';
-import './FileManager.less';
+import './FileManager.css';
 
 const propTypes = {
   className: PropTypes.string

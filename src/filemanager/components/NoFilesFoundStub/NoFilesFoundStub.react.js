@@ -1,12 +1,12 @@
 import React from 'react';
-import './NoFilesFoundStub.less';
-import Svg from '@opuscapita/react-svg';
+import './NoFilesFoundStub.css';
+import {SVG} from '@opuscapita/react-svg';
 const nothingToShowIcon = require('@opuscapita/svg-icons/lib/add_to_photos.svg');
 
 // TODO Add localization
 const stub = () => (
   <div className="oc-fm--no-files-found-stub">
-    <Svg
+    <SVG
       className="oc-fm--no-files-found-stub__icon"
       svg={nothingToShowIcon}
     />

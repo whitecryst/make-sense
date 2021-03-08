@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import './DropdownMenuItem.less';
+import './DropdownMenuItem.css';
 import {SVG} from '@opuscapita/react-svg';
 
 const propTypes = {

@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import './Dialog.less';
+import './Dialog.css';
 
 const propTypes = {
   autofocus: PropTypes.bool,

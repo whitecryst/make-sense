@@ -20,7 +20,8 @@ import {ProjectType} from "../../../data/enums/ProjectType";
 //import ReactDOM from 'react-dom';
 //import { FileManager, FileNavigator } from '@opuscapita/react-filemanager';
 import { FileManager, FileNavigator } from "../../../filemanager";
-import connectorNodeV1 from '@opuscapita/react-filemanager-connector-node-v1';
+//import connectorNodeV1 from '@opuscapita/react-filemanager-connector-node-v1';
+import connectorNodeV1 from "../../../filemanager/server-connector";
 // filemanager end
 
 interface IProps {
@@ -107,7 +108,7 @@ const EditorContainer: React.FC<IProps> = (
         }
         
         const fileManager = (
-         <div style={{ height: '100%', width: '500px', background: '#171717' }}>
+         <div style={{ height: '100%', width: '400px', background: '#171717' }}>
             <FileManager>
               <FileNavigator
                 id="filemanager-1"

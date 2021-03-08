@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import './ListView.less';
+import './ListView.css';
 import 'react-virtualized/styles.css';
 // TBD individual imports from 'react-virtualized' to decrease bundle size?
 // ex. import Table from 'react-virtualized/dist/commonjs/Table'

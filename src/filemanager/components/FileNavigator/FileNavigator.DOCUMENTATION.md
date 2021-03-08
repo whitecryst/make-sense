@@ -141,7 +141,7 @@ For **Massive Attack** folder in **Customization area => Music => Massive Attack
         ({
           id: 'custom-button',
           icon: {
-            svg: '<svg viewBox="0 0 120 120" version="1.1"><circle cx="60" cy="60" r="50"></circle></svg>'
+            svg: '<SVG viewBox="0 0 120 120" version="1.1"><circle cx="60" cy="60" r="50"></circle></SVG>'
           },
           label: 'Custom Button',
           shouldBeAvailable: () => true,

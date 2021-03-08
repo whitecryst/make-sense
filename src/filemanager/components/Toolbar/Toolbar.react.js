@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import './Toolbar.less';
-//import Svg from '@opuscapita/react-svg';
+import './Toolbar.css';
+//import {SVG} from '@opuscapita/react-svg';
 import {SVG} from '@opuscapita/react-svg';
 import DropdownMenu from '../DropdownMenu';
 import DropdownMenuItem from '../DropdownMenuItem';

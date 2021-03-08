@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import './ContextMenuItem.less';
+import './ContextMenuItem.css';
 import { MenuItem } from "react-contextmenu";
 import DropdownMenuItem from '../DropdownMenuItem';
 

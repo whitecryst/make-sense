@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import './SearchDialog.less';
+import './SearchDialog.css';
 import Dialog from '../Dialog';
 
 const propTypes = {

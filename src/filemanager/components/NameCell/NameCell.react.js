@@ -1,6 +1,6 @@
 import React from 'react';
-import './NameCell.less';
-import Svg from '@opuscapita/react-svg';
+import './NameCell.css';
+import {SVG} from '@opuscapita/react-svg';
 import LoadingCell from '../LoadingCell';
 
 const nc = ({ loading, getIcon }) => (cellProps) => {
@@ -13,7 +13,7 @@ const nc = ({ loading, getIcon }) => (cellProps) => {
   return (
     <div className="oc-fm--name-cell">
       <div className="oc-fm--name-cell__icon">
-        <Svg
+        <SVG
           className="oc-fm--name-cell__icon-image"
           svg={svg}
           style={{ fill }}

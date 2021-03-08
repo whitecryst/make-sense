@@ -1,6 +1,6 @@
 import React from 'react';
-import './HeaderCell.less';
-import Svg from '@opuscapita/react-svg';
+import './HeaderCell.css';
+import {SVG} from '@opuscapita/react-svg';
 import { SortDirection } from 'react-virtualized';
 
 const sortASCIcon = require('@opuscapita/svg-icons/lib/arrow_drop_down.svg');
@@ -18,7 +18,7 @@ const fn = () => ({
 }) => {
   const sortIconSvg = sortDirection === SortDirection.ASC ? sortDESCIcon : sortASCIcon;
   const sortIconElement = dataKey === sortBy ? (
-    <Svg className="oc-fm--header-cell__sort-icon" svg={sortIconSvg} />
+    <SVG className="oc-fm--header-cell__sort-icon" svg={sortIconSvg} />
   ) : null;
 
   return (
