@@ -1,0 +1,45 @@
+@keyframes keyframes-oc-fm--list-view-row-appearing {
+  0% {
+    opacity: 0;
+ }
+  100% {
+    opacity: 1;
+ }
+}
+.oc-fm--list-view {
+  will-change: opacity;
+  height: 100%;
+  width: 100%;
+}
+.oc-fm--list-view__table {
+  color: #fff;
+}
+.oc-fm--list-view__grid:focus {
+  outline: none;
+}
+.oc-fm--list-view__row {
+  animation: keyframes-oc-fm--list-view-row-appearing 150ms;
+  animation-timing-function: ease-in-out;
+}
+.oc-fm--list-view__row:hover:not(.oc-fm--list-view__row--selected):not(.oc-fm--list-view__row--loading) {
+  background-color: #767676;
+  color: #303030;
+}
+.oc-fm--list-view__row:hover:not(.oc-fm--list-view__row--selected) .oc-fm--name-cell__icon {
+  background-color: transparent;
+}
+.oc-fm--list-view__row--selected {
+  position: relative;
+  background-color: #2196F3;
+  color: #ccc;
+  border-bottom-color: transparent;
+}
+.oc-fm--list-view .ReactVirtualized__Table__headerRow {
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.oc-fm--list-view .ReactVirtualized__Table__row:focus {
+  outline: none;
+}
+.oc-fm--list-view .ReactVirtualized__Table__sortableHeaderColumn:focus {
+  outline: none;
+}
