@@ -10,6 +10,9 @@ import {AcceptedFileType} from "../../../data/enums/AcceptedFileType";
 import {PopupActions} from "../../../logic/actions/PopupActions";
 import {ImageDataUtil} from "../../../utils/ImageDataUtil";
 
+
+
+
 interface IProps {
     addImageData: (imageData: ImageData[]) => any;
 }

@@ -11,6 +11,11 @@ import clickOutside from 'react-click-outside';
 import ContextMenu from '../ContextMenu';
 import rawToReactElement from '../raw-to-react-element';
 import { createHistory, pushToHistory } from '../history';
+import { connect } from 'react-redux';
+import {AppState} from "../../../store";
+import { addImageData } from '../../../store/labels/actionCreators';
+import {store} from "../../../index";
+
 
 function hasContext(capability, context) {
   return capability.availableInContexts && capability.availableInContexts.indexOf(context) !== -1;
@@ -380,8 +385,13 @@ class FileNavigator extends Component {
     getResourceChildren: () => this.state.resourceChildren,
     getResourceLocation: () => this.state.resourceLocation,
     getNotifications: () => this.state.notifications,
-    getSortState: () => ({ sortBy: this.state.sortBy, sortDirection: this.state.sortDirection })
+    getSortState: () => ({ sortBy: this.state.sortBy, sortDirection: this.state.sortDirection }),
+    addImageData: this.addImage
   });
+
+  addImage = (imgFile) => {
+    store.dispatch(addImageData( imgFile ))  ;
+  };
 
   getContextCapabilities = ({ context, isDataView = false }) => {
     const { apiOptions } = this.props;
@@ -524,6 +534,17 @@ class FileNavigator extends Component {
   }
 }
 
-export default FileNavigator;
+const mapDispatchToProps = {
+  addImageData
+};
+
+const mapStateToProps = (state) => ({});
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(FileNavigator);
+
+//export default FileNavigator;
 FileNavigator.propTypes = propTypes;
 FileNavigator.defaultProps = defaultProps;

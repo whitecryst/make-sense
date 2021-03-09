@@ -61,7 +61,7 @@ const ImagesDropZone: React.FC<IProps> = ({updateActiveImageIndex, addImageData,
         console.log("try to connect to google sheets");
         const { GoogleSpreadsheet } = require('google-spreadsheet');
 
-        const creds = require('../../../googleSheetCredentials.json'); // the file saved above
+        const creds = require('../../../GoogleSheetCredentials.json'); // the file saved above
         
         // Initialize the sheet - doc ID is the long id in the sheets URL
         const doc = new GoogleSpreadsheet('17Mdd7GZFlaZ169M7bJqiUf5WV437MCZ25_Hw9fgfJF8');
