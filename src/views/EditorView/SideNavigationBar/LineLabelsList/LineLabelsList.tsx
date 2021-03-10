@@ -45,7 +45,7 @@ const LineLabelsList: React.FC<IProps> = (
     };
     const listStyleContent: React.CSSProperties = {
         width: size.width,
-        height: imageData.labelLines.length * labelInputFieldHeight
+        height: imageData ? imageData.labelLines.length * labelInputFieldHeight : size.height
     };
 
     const deleteLineLabelById = (labelLineId: string) => {
@@ -99,7 +99,7 @@ const LineLabelsList: React.FC<IProps> = (
             style={listStyle}
             onClickCapture={onClickHandler}
         >
-            {imageData.labelLines.length === 0 ?
+            {imageData ? imageData.labelLines.length === 0 ?
                 <EmptyLabelList
                     labelBefore={"draw your first line"}
                     labelAfter={"no labels created for this image yet"}
@@ -112,6 +112,11 @@ const LineLabelsList: React.FC<IProps> = (
                         {getChildren()}
                     </div>
                 </Scrollbars>
+                :
+                <EmptyLabelList
+                    labelBefore={"no image loaded"}
+                    labelAfter={"no labels created "}
+                />
             }
         </div>
     );

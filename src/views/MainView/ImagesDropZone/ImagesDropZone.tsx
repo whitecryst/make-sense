@@ -119,7 +119,8 @@ const ImagesDropZone: React.FC<IProps> = ({updateActiveImageIndex, addImageData,
     };
 
     const getDropZoneContent = () => {
-        if (acceptedFiles.length === 0)
+        
+        if (acceptedFiles.length === 0 )
             return <>
                 <input {...getInputProps()} />
                 <img
@@ -153,11 +154,13 @@ const ImagesDropZone: React.FC<IProps> = ({updateActiveImageIndex, addImageData,
             </>;
     };
 
+    /* <div {...getRootProps({className: 'DropZone'})}>
+        {getDropZoneContent()}
+        </div>
+                */
     return(
         <div className="ImagesDropZone">
-            <div {...getRootProps({className: 'DropZone'})}>
-                {getDropZoneContent()}
-            </div>
+           
             <div className="DropZoneButtons">
                 <TextButton
                     label={"Object Detection"}

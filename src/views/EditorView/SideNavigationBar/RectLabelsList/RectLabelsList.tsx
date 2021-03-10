@@ -35,7 +35,7 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
     };
     const listStyleContent: React.CSSProperties = {
         width: size.width,
-        height: imageData.labelRects.length * labelInputFieldHeight
+        height: imageData ? imageData.labelRects.length * labelInputFieldHeight : size.height
     };
 
     const deleteRectLabelById = (labelRectId: string) => {
@@ -93,7 +93,7 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
             style={listStyle}
             onClickCapture={onClickHandler}
         >
-            {imageData.labelRects.filter((labelRect: LabelRect) => labelRect.status === LabelStatus.ACCEPTED).length === 0 ?
+            {imageData ? imageData.labelRects.filter((labelRect: LabelRect) => labelRect.status === LabelStatus.ACCEPTED).length === 0 ?
                 <EmptyLabelList
                     labelBefore={"draw your first bounding box"}
                     labelAfter={"no labels created for this image yet"}
@@ -106,6 +106,11 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
                         {getChildren()}
                     </div>
                 </Scrollbars>
+                :
+                <EmptyLabelList
+                    labelBefore={"no image loaded"}
+                    labelAfter={"no labels created "}
+                /> 
             }
         </div>
     );

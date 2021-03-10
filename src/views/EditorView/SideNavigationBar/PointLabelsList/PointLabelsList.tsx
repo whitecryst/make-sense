@@ -46,7 +46,7 @@ const PointLabelsList: React.FC<IProps> = (
     };
     const listStyleContent: React.CSSProperties = {
         width: size.width,
-        height: imageData.labelPoints.length * labelInputFieldHeight
+        height: imageData ? imageData.labelPoints.length * labelInputFieldHeight : size.height
     };
 
     const deletePointLabelById = (labelPointId: string) => {
@@ -101,7 +101,7 @@ const PointLabelsList: React.FC<IProps> = (
             style={listStyle}
             onClickCapture={onClickHandler}
         >
-            {imageData.labelPoints.filter((labelPoint: LabelPoint) => labelPoint.status === LabelStatus.ACCEPTED).length === 0 ?
+            {imageData ? imageData.labelPoints.filter((labelPoint: LabelPoint) => labelPoint.status === LabelStatus.ACCEPTED).length === 0 ?
                 <EmptyLabelList
                     labelBefore={"mark your first point"}
                     labelAfter={"no labels created for this image yet"}
@@ -114,6 +114,11 @@ const PointLabelsList: React.FC<IProps> = (
                         {getChildren()}
                     </div>
                 </Scrollbars>
+                :
+                <EmptyLabelList
+                    labelBefore={"no Image loaded"}
+                    labelAfter={"no labels created "}
+                />
             }
         </div>
     );

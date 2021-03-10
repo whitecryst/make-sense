@@ -10,7 +10,7 @@ export class Settings {
     public static readonly EDITOR_TOP_NAVIGATION_BAR_HEIGHT_PX: number = 40 + 1;
     public static readonly SIDE_NAVIGATION_BAR_WIDTH_CLOSED_PX: number = 23 + 1;
     public static readonly SIDE_NAVIGATION_BAR_WIDTH_OPEN_PX: number = Settings.SIDE_NAVIGATION_BAR_WIDTH_CLOSED_PX + 300 + 1;
-    public static readonly SIDE_NAVIGATION_BAR_FOLDERS_WIDTH_OPEN_PX: number = Settings.SIDE_NAVIGATION_BAR_WIDTH_CLOSED_PX + 600 + 1;
+    public static readonly SIDE_NAVIGATION_BAR_FOLDERS_WIDTH_OPEN_PX: number = Settings.SIDE_NAVIGATION_BAR_WIDTH_CLOSED_PX + 400 + 1;
     public static readonly TOOLKIT_TAB_HEIGHT_PX: number = 40;
     public static readonly TOOLBOX_PANEL_WIDTH_PX: number = 50 + 1;
 

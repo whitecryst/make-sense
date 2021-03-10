@@ -34,7 +34,7 @@ const PolygonLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataBy
     };
     const listStyleContent: React.CSSProperties = {
         width: size.width,
-        height: imageData.labelPolygons.length * labelInputFieldHeight
+        height: imageData ? imageData.labelPolygons.length * labelInputFieldHeight : size.height
     };
 
     const deletePolygonLabelById = (labelPolygonId: string) => {
@@ -87,7 +87,7 @@ const PolygonLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataBy
             style={listStyle}
             onClickCapture={onClickHandler}
         >
-            {imageData.labelPolygons.length === 0 ?
+            {imageData ? imageData.labelPolygons.length === 0 ?
                 <EmptyLabelList
                     labelBefore={"draw your first polygon"}
                     labelAfter={"no labels created for this image yet"}
@@ -100,6 +100,11 @@ const PolygonLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataBy
                         {getChildren()}
                     </div>
                 </Scrollbars>
+                :
+                <EmptyLabelList
+                labelBefore={"no image loaded"}
+                labelAfter={"no labels created"}
+                />
             }
         </div>
     );

@@ -79,14 +79,17 @@ class Editor extends React.Component<IProps, IState> {
     public componentDidUpdate(prevProps: Readonly<IProps>, prevState: Readonly<{}>, snapshot?: any): void {
         const {imageData, activeLabelType} = this.props;
 
-        prevProps.imageData.id !== imageData.id && ImageLoadManager.addAndRun(this.loadImage(imageData));
+        if(imageData) {
+            
+            (!prevProps.imageData || prevProps.imageData.id !== imageData.id) && ImageLoadManager.addAndRun(this.loadImage(imageData));
+            
+            if (prevProps.activeLabelType !== activeLabelType) {
+                EditorActions.swapSupportRenderingEngine(activeLabelType);
+                AIActions.detect(imageData.id, ImageRepository.getById(imageData.id));
+            }
 
-        if (prevProps.activeLabelType !== activeLabelType) {
-            EditorActions.swapSupportRenderingEngine(activeLabelType);
-            AIActions.detect(imageData.id, ImageRepository.getById(imageData.id));
+            this.updateModelAndRender();
         }
-
-        this.updateModelAndRender();
     }
 
     // =================================================================================================================
@@ -112,7 +115,10 @@ class Editor extends React.Component<IProps, IState> {
     // =================================================================================================================
 
     private loadImage = async (imageData: ImageData): Promise<any> => {
-        if (imageData.loadStatus) {
+        if(!imageData) {
+            // no image loaded
+        }
+        else if (imageData.loadStatus) {
             EditorActions.setActiveImage(ImageRepository.getById(imageData.id));
             AIActions.detect(imageData.id, ImageRepository.getById(imageData.id));
             this.updateModelAndRender()
@@ -181,7 +187,8 @@ class Editor extends React.Component<IProps, IState> {
 
     private getOptionsPanels = () => {
         const editorData: EditorData = EditorActions.getEditorData();
-        if (this.props.activeLabelType === LabelType.RECT) {
+        console.log(this.props.imageData);
+        if (this.props.activeLabelType === LabelType.RECT && this.props.imageData ) {
             return this.props.imageData.labelRects
                 .filter((labelRect: LabelRect) => labelRect.isCreatedByAI && labelRect.status !== LabelStatus.ACCEPTED)
                 .map((labelRect: LabelRect) => {
