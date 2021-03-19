@@ -38,7 +38,7 @@ class LocationBar extends Component {
 
     const itemsElement = items.map((item, i) => {
       const arrow = i < items.length - 1 ? (
-        <SVG className="oc-fm--location-bar__item-arrow" svg={arrowIcon} />
+        ">"
       ) : null;
 
       return (

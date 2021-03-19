@@ -68,6 +68,7 @@ export function labelsReducer(
             }
         }
         case Action.UPDATE_LABEL_NAMES: {
+            console.log("update label state")
             return {
                 ...state,
                 labels: action.payload.labels

@@ -49,10 +49,10 @@
 
       .DropdownLabel {
         position: relative;
-        font-size: 14px;
+        font-size: 12px;
         cursor: pointer;
         user-select: none;
-        min-width: 160px;
+        min-width: 250px;
         height: 30px;
         padding: 0 5px;
         color: white;
@@ -108,7 +108,8 @@
           align-items: center;
           align-content: flex-start;
 
-          font-size: 14px;
+          font-size: 12px;
+          line-height: 0.9;
           cursor: pointer;
           user-select: none;
           padding: 0 5px;

@@ -6,6 +6,8 @@
     opacity: 1;
  }
 }
+.
+
 .oc-fm--list-view {
   will-change: opacity;
   height: 100%;
@@ -14,6 +16,7 @@
 .oc-fm--list-view__table {
   color: #fff;
 }
+
 .oc-fm--list-view__grid:focus {
   outline: none;
 }

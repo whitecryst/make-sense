@@ -6,7 +6,8 @@ import './RectLabelsList.scss';
 import {
     updateActiveLabelId,
     updateActiveLabelNameId,
-    updateImageDataById
+    updateImageDataById,
+    updateLabelNames
 } from "../../../../store/labels/actionCreators";
 import {AppState} from "../../../../store";
 import {connect} from "react-redux";
@@ -15,6 +16,9 @@ import EmptyLabelList from "../EmptyLabelList/EmptyLabelList";
 import {LabelActions} from "../../../../logic/actions/LabelActions";
 import {LabelStatus} from "../../../../data/enums/LabelStatus";
 import {findLast} from "lodash";
+import { v4 as uuidv4 } from 'uuid';
+import {TextButton} from "../../../Common/TextButton/TextButton";
+import { LabelUtil } from "../../../../utils/LabelUtil";
 
 interface IProps {
     size: ISize;
@@ -87,12 +91,15 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
         });
     };
 
+    
+ 
+
     return (
         <div
             className="RectLabelsList"
             style={listStyle}
             onClickCapture={onClickHandler}
-        >
+        > 
             {imageData ? imageData.labelRects.filter((labelRect: LabelRect) => labelRect.status === LabelStatus.ACCEPTED).length === 0 ?
                 <EmptyLabelList
                     labelBefore={"draw your first bounding box"}
@@ -119,7 +126,8 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
 const mapDispatchToProps = {
     updateImageDataById,
     updateActiveLabelNameId,
-    updateActiveLabelId
+    updateActiveLabelId,
+    updateLabelNames
 };
 
 const mapStateToProps = (state: AppState) => ({

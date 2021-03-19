@@ -30,9 +30,70 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
         updateLabelNames,
         isUpdate
     }) => {
-    const initialLabels = LabelUtil.convertLabelNamesListToMap(LabelsSelector.getLabelNames());
-    const [labelNames, setLabelNames] = useState(initialLabels);
 
+
+    const useForceUpdate = () => {
+        const [value, setValue] = useState(0); // integer state
+        return () => setValue(value => value + 1); // update the state to force render
+    }
+
+    const LoadSymbolLabelsFromGoogleSheets = async (labelNames : LabelName[]) => {
+        console.log("try to connect to google sheets");
+        const { GoogleSpreadsheet } = require('google-spreadsheet');
+        const creds = require('../../../GoogleSheetCredentials.json'); // the file saved above
+        
+        // Initialize the sheet - doc ID is the long id in the sheets URL
+        const doc = new GoogleSpreadsheet('17Mdd7GZFlaZ169M7bJqiUf5WV437MCZ25_Hw9fgfJF8');
+        let errorOccured = false;
+        try {
+            await doc.useServiceAccountAuth(creds);
+            await doc.loadInfo(); // loads document properties and worksheets
+            console.log(doc.title);
+        } catch (error) {
+            console.error(error);
+            // expected output: ReferenceError: nonExistentFunction is not defined
+            // Note - error messages will vary depending on browser
+            errorOccured = true;
+        }
+        
+        if( !errorOccured ) {
+            const sheet = doc.sheetsByTitle['ImageSymbols']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+            const numrows = sheet.rowCount;
+            console.log(sheet.title);
+            console.log( numrows );
+            
+            // read cells
+            await sheet.loadCells('H1:H'+sheet.rowCount);
+
+            // read/write row values
+            let labelCount = 0;
+            for (var i = 1; i < numrows; i++) { // numrows
+                let labelName = sheet.getCellByA1('H'+(i+1)).value;
+                
+                if( labelName != null ) {
+                    //console.log( "act Label: "+labelName ); 
+                    labelNames = { ...labelNames, [uuidv4()]: labelName };
+                    labelCount += 1;
+                }
+            }
+            console.log("in load. labelNames:"+labelCount);
+            //console.log(labelNames);
+            
+        }
+        updateLabelNames( LabelUtil.convertMapToLabelNamesList(labelNames).sort());
+        return labelNames;
+        
+    };
+
+    let initialLabels = LabelUtil.convertLabelNamesListToMap(LabelsSelector.getLabelNames());
+    initialLabels = LoadSymbolLabelsFromGoogleSheets(initialLabels);
+    //console.log("after load...");
+    //console.log(initialLabels);
+    
+    
+    const [labelNames, setLabelNames] = useState(initialLabels);
+    //setLabelNames(initialLabels);
+    
     const addHandle = () => {
         const newLabelNames = { ...labelNames, [uuidv4()]: "" };
         setLabelNames(newLabelNames);
@@ -76,6 +137,7 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
 
     const onCreateAccept = () => {
         const labelNamesList: string[] = extractLabelNamesList();
+        
         if (labelNamesList.length > 0) {
             updateLabelNames(LabelUtil.convertMapToLabelNamesList(labelNames));
         }
@@ -129,9 +191,7 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
                 </div>
                 <div className="LabelsContainer">
                     {Object.keys(labelNames).length !== 0 ? <Scrollbars>
-                        <div
-                            className="InsertLabelNamesPopupContent"
-                        >
+                        <div className="InsertLabelNamesPopupContent">
                             {labelInputs}
                         </div>
                     </Scrollbars> :
@@ -153,7 +213,7 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
 
     return (
         <GenericYesNoPopup
-            title={isUpdate ? "Edit labels" : "Create labels"}
+            title={isUpdate ? "Load labels" : "Create labels"}
             renderContent={renderContent}
             acceptLabel={isUpdate ? "Accept" : "Start project"}
             onAccept={isUpdate ? onUpdateAccept : onCreateAccept}

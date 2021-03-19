@@ -5,7 +5,7 @@ import {ImageData, LabelPoint, LabelRect} from "../../../store/labels/types";
 import {FileUtil} from "../../../utils/FileUtil";
 import {AppState} from "../../../store";
 import {connect} from "react-redux";
-import {updateImageDataById} from "../../../store/labels/actionCreators";
+import {updateImageDataById, updateLabelNames} from "../../../store/labels/actionCreators";
 import {ImageRepository} from "../../../logic/imageRepository/ImageRepository";
 import {LabelType} from "../../../data/enums/LabelType";
 import {PopupWindowType} from "../../../data/enums/PopupWindowType";
@@ -28,6 +28,10 @@ import {RenderEngineUtil} from "../../../utils/RenderEngineUtil";
 import {LabelStatus} from "../../../data/enums/LabelStatus";
 import {isEqual} from "lodash";
 import {AIActions} from "../../../logic/actions/AIActions";
+import RectLabelsList from '../SideNavigationBar/RectLabelsList/RectLabelsList';
+import { v4 as uuidv4 } from 'uuid';
+import { LabelName } from "../../../store/labels/types";
+import InsertLabelNamesPopup from '../../PopupView/InsertLabelNamesPopup/InsertLabelNamesPopup';
 
 interface IProps {
     size: ISize;
@@ -39,6 +43,7 @@ interface IProps {
     customCursorStyle: CustomCursorStyle;
     imageDragMode: boolean;
     zoom: number;
+    updateLabelNames: (loadedLabelNames) => any;
 }
 
 interface IState {
@@ -53,7 +58,7 @@ class Editor extends React.Component<IProps, IState> {
             viewPortSize: {
                 width: 0,
                 height: 0
-            },
+            }
         };
     }
 
@@ -187,7 +192,7 @@ class Editor extends React.Component<IProps, IState> {
 
     private getOptionsPanels = () => {
         const editorData: EditorData = EditorActions.getEditorData();
-        console.log(this.props.imageData);
+        //console.log(this.props.imageData);
         if (this.props.activeLabelType === LabelType.RECT && this.props.imageData ) {
             return this.props.imageData.labelRects
                 .filter((labelRect: LabelRect) => labelRect.isCreatedByAI && labelRect.status !== LabelStatus.ACCEPTED)
