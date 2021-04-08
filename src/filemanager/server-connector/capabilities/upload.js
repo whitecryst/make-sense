@@ -25,6 +25,7 @@ async function handler(apiOptions, actions) {
   const prevResourceId = getResource().id;
 
   const onStart = ({ name, size }) => {
+    /*
     const notifications = getNotifications();
     const notification = notifUtils.getNotification(notifications, notificationId);
     const childElement = {
@@ -49,10 +50,11 @@ async function handler(apiOptions, actions) {
       notifUtils.updateNotification(notifications, notificationId, newNotification) :
       notifUtils.addNotification(notifications, notificationId, newNotification);
 
-    updateNotifications(newNotifications);
+    updateNotifications(newNotifications);*/
   };
 
   const onProgress = progress => {
+    /*
     const notifications = getNotifications();
     const notification = notifUtils.getNotification(notifications, notificationId);
     const child = notifUtils.getChild(notification.children, notificationChildId);
@@ -68,18 +70,21 @@ async function handler(apiOptions, actions) {
     };
     const newChildren = notifUtils.updateChild(notification.children, notificationChildId, newChild);
     const newNotifications = notifUtils.updateNotification(notifications, notificationId, { children: newChildren });
-    updateNotifications(newNotifications);
+    updateNotifications(newNotifications);*/
   };
 
   const resource = getResource();
   try {
     const file = await readLocalFile(true);
+    // TODO: reactivate this line (throws error)
     onStart({ name: file.name, size: file.file.size });
     const response = await api.uploadFileToId({ apiOptions, parentId: resource.id, file, onProgress });
     const newResource = normalizeResource(response.body[0]);
-    const notifications = getNotifications();
+    
+    /*const notifications = getNotifications();
     const notification = notifUtils.getNotification(notifications, notificationId);
     const notificationChildrenCount = notification.children.length;
+    
     let newNotifications;
     if (notificationChildrenCount > 1) {
       newNotifications = notifUtils.updateNotification(
@@ -91,7 +96,7 @@ async function handler(apiOptions, actions) {
     } else {
       newNotifications = notifUtils.removeNotification(notifications, notificationId);
     }
-    updateNotifications(newNotifications);
+    updateNotifications(newNotifications);*/
     if (prevResourceId === resource.id) {
       navigateToDir(resource.id, newResource.id, false);
     }

@@ -108,7 +108,7 @@ const EditorContainer: React.FC<IProps> = (
         }
         
         const fileManager = (
-         <div style={{ height: '100%', width: '350px', background: '#171717' }}>
+         <div style={{ height: '100%', width: '400px', background: '#171717' }}>
             <FileManager>
               <FileNavigator
                 id="filemanager-1"

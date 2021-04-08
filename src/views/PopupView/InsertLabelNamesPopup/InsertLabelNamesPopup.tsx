@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { LabelName } from "../../../store/labels/types";
 import { LabelUtil } from "../../../utils/LabelUtil";
 import { LabelsSelector } from "../../../store/selectors/LabelsSelector";
+import { KtkSelector } from "../../../store/selectors/KtkSelector";
 import { LabelActions } from "../../../logic/actions/LabelActions";
 import { ProjectType } from "../../../data/enums/ProjectType";
 
@@ -86,9 +87,10 @@ const InsertLabelNamesPopup: React.FC<IProps> = (
     };
 
     let initialLabels = LabelUtil.convertLabelNamesListToMap(LabelsSelector.getLabelNames());
-    initialLabels = LoadSymbolLabelsFromGoogleSheets(initialLabels);
-    //console.log("after load...");
-    //console.log(initialLabels);
+
+    initialLabels = LabelUtil.convertLabelNamesListToMap( KtkSelector.getSymbolsContentAsLabelNames() );
+    console.log("after load...");
+    console.log(initialLabels);
     
     
     const [labelNames, setLabelNames] = useState(initialLabels);

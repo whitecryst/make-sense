@@ -27,10 +27,14 @@ const translations = {
     tooLongFolderName: 'Folder name can\'t contain more than 255 characters',
     folderNameNotAllowedCharacters: 'Folder name contains not allowed characters',
     title: 'Title',
-    fileSize: 'File size',
+    fileSize: 'Size',
+    ktk_id: 'SeriesId',
     lastModified: 'Last modified',
     reallyRemove: '{files} will be deleted. Do you really want to proceed?',
-    unableReadDir: 'Unable to read a directory.'
+    unableReadDir: 'Unable to read a directory.',
+    emptyImageSeriesId: 'Image Series ID cant be empty',
+    imageSeriesId: 'ImageSeries ID',
+    assignImageSeries: 'Assign image series'
   },
   fr: {
     uploading: 'Ajout d\'un document en cours',

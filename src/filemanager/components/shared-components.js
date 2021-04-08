@@ -9,6 +9,7 @@ import Notification from './Notification';
 import NotificationProgressItem from './NotificationProgressItem';
 import ProgressIcon from './ProgressIcon';
 import SetNameDialog from './SetNameDialog';
+import AssignImageSeriesDialog from './AssignImageSeriesDialog';
 import { Column } from 'react-virtualized';
 
 const comp = {
@@ -23,6 +24,7 @@ const comp = {
   Notification,
   NotificationProgressItem,
   ProgressIcon,
-  SetNameDialog
+  SetNameDialog,
+  AssignImageSeriesDialog
 };
 export default comp;

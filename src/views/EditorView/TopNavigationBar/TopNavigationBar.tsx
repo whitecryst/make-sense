@@ -49,6 +49,7 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
                     <DropDownMenu/>
                 </div>
                 <div className="NavigationBarGroupWrapper middle">
+                    {/*
                     <div className="ProjectName">Project Name:</div>
                     <TextInput
                         key={"ProjectName"}
@@ -56,14 +57,29 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
                         value={projectData.name}
                         onChange={onChange}
                         onFocus={onFocus}
-                    />
+                    />*/}
                 </div>
                 <div className="NavigationBarGroupWrapper">
                     <ImageButton
-                        image={"ico/github-logo.png"}
-                        imageAlt={"github-logo.png"}
-                        buttonSize={{width: 30, height: 30}}
-                        href={Settings.GITHUB_URL}
+                        image={"ico/googlesheetLogoC.png"}
+                        imageAlt={"googlesheet-logo-C.png"}
+                        buttonSize={{width: 35, height: 35}}
+                        href={Settings.KTK_GOOGLESHEET_CATEGORIES_URL}
+                        title={"Open Categories-sheet"}
+                    />
+                    <ImageButton
+                        image={"ico/googlesheetLogoR.png"}
+                        imageAlt={"googlesheet-logo-R.png"}
+                        buttonSize={{width: 35, height: 35}}
+                        href={Settings.KTK_GOOGLESHEET_ROUTINES_URL}
+                        title={"Open Routines-sheet"}
+                    />
+                    <ImageButton
+                        image={"ico/yinyang.png"}
+                        imageAlt={"yinyang.png"}
+                        buttonSize={{width: 35, height: 35}}
+                        href={Settings.KUNGFUWIKI_URL}
+                        title={"Open Kungfu-Wiki"}
                     />
                 </div>
             </div>

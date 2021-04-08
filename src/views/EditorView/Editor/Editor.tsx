@@ -28,6 +28,7 @@ import {RenderEngineUtil} from "../../../utils/RenderEngineUtil";
 import {LabelStatus} from "../../../data/enums/LabelStatus";
 import {isEqual} from "lodash";
 import {AIActions} from "../../../logic/actions/AIActions";
+import {KtkActions} from "../../../logic/actions/KtkActions"
 import RectLabelsList from '../SideNavigationBar/RectLabelsList/RectLabelsList';
 import { v4 as uuidv4 } from 'uuid';
 import { LabelName } from "../../../store/labels/types";
@@ -43,7 +44,7 @@ interface IProps {
     customCursorStyle: CustomCursorStyle;
     imageDragMode: boolean;
     zoom: number;
-    updateLabelNames: (loadedLabelNames) => any;
+    //updateLabelNames: (loadedLabelNames) => any;
 }
 
 interface IState {
@@ -70,11 +71,13 @@ class Editor extends React.Component<IProps, IState> {
         this.mountEventListeners();
 
         const {imageData, activeLabelType} = this.props;
-
+        
         ContextManager.switchCtx(ContextType.EDITOR);
         EditorActions.mountRenderEnginesAndHelpers(activeLabelType);
         ImageLoadManager.addAndRun(this.loadImage(imageData));
         ViewPortActions.resizeCanvas(this.props.size);
+
+
     }
 
     public componentWillUnmount(): void {

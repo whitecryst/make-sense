@@ -51,6 +51,25 @@ const listViewLayout = (viewLayoutOptions) => {
     ({
       elementType: 'Column',
       elementProps: {
+        key: "ktk_id",
+        width: 50,
+        dataKey: "ktk_id",
+        label: getMessage('ktk_id'),
+        flexGrow: viewLayoutOptions.width > TABLET_WIDTH ? 1 : 0,
+        cellRenderer: {
+          elementType: 'Cell',
+          callArguments: [{ ...viewLayoutOptions }]
+        },
+        headerRenderer: {
+          elementType: 'HeaderCell',
+          callArguments: [viewLayoutOptions]
+        },
+        disableSort: true
+      }
+    }),
+    ({
+      elementType: 'Column',
+      elementProps: {
         key: "size",
         width: 100,
         dataKey: "size",

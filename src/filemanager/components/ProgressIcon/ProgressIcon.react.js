@@ -51,7 +51,7 @@ class ProgressIcon extends Component {
         className="oc-fm--progress-icon"
         style={{ width: size, height: size }}
       >
-        <SVG className="oc-fm--progress-icon__svg" viewBox={`0 0 ${viewportSize} ${viewportSize}`}>
+        <SVG className="oc-fm--progress-icon__svg" /*viewBox={`0 0 ${viewportSize} ${viewportSize}`}*/>
           <circle
             className="oc-fm--progress-icon__svg-meter"
             cx={circlePos}

@@ -40,6 +40,18 @@ class NotificationProgressItem extends Component {
       </div>
     ) : null;
 
+
+    return (
+      <div className="oc-fm--notification-progress-item">
+        
+        
+        <div className="oc-fm--notification-progress-item__progress-icon">
+          <ProgressIcon radius={12} progress={progress} />
+        </div>
+      </div>
+    );
+
+    /* // removed due to dangerousInnerHtmlInsert error
     return (
       <div className="oc-fm--notification-progress-item">
         {iconElement}
@@ -48,7 +60,7 @@ class NotificationProgressItem extends Component {
           <ProgressIcon radius={12} progress={progress} />
         </div>
       </div>
-    );
+    );*/
   }
 }
 

@@ -10,5 +10,6 @@ module.exports = {
   NotificationProgressItem: require('./components/NotificationProgressItem').default,
   ProgressIcon: require('./components/ProgressIcon').default,
   SetNameDialog: require('./components/SetNameDialog').default,
+  AssignImageSeriesDialog: require('./components/AssignImageSeriesDialog').default,
   notifUtils: require('./components/Notifications/utils').default
 };

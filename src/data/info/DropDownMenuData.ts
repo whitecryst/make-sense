@@ -26,7 +26,7 @@ export const DropDownMenuData: DropDownMenuNode[] = [
                 imageAlt: "labels",
                 disabled: false,
                 onClick: () => store.dispatch(updateActivePopupType(PopupWindowType.UPDATE_LABEL))
-            },
+            }/*,
             {
                 name: "Import Images",
                 description: "Load more images",
@@ -58,7 +58,7 @@ export const DropDownMenuData: DropDownMenuNode[] = [
                 imageAlt: "load-ai-model",
                 disabled: false,
                 onClick: () => store.dispatch(updateActivePopupType(PopupWindowType.LOAD_AI_MODEL))
-            },
+            },*/
         ]
     },
     {
@@ -72,8 +72,9 @@ export const DropDownMenuData: DropDownMenuNode[] = [
                 description: "Coming soon",
                 imageSrc: "ico/documentation.png",
                 imageAlt: "documentation",
-                disabled: true
-            },
+                disabled: false,
+                onClick: () => window.open("https://docs.google.com/document/d/1AjMb5V9WVDslx4tXdOMO6fYxIHSdz2Ysmo23W6hXjbs/edit?usp=sharing", "_blank")
+            }/*,
             {
                 name: "Bugs and Features",
                 description: "Coming soon",
@@ -81,7 +82,7 @@ export const DropDownMenuData: DropDownMenuNode[] = [
                 imageAlt: "bug",
                 disabled: false,
                 onClick: () => window.open("https://github.com/SkalskiP/make-sense/issues", "_blank")
-            }
+            }*/
         ]
     }
 ]

@@ -15,10 +15,11 @@ export interface ImageButtonProps extends React.HTMLProps<HTMLDivElement> {
     isActive?:boolean;
     isDisabled?:boolean;
     externalClassName?:string;
+    title?:string;
 }
 
 export const ImageButton = React.forwardRef((props: ImageButtonProps, ref: LegacyRef<HTMLDivElement>) => {
-    const {buttonSize, padding, image, imageAlt, href, onClick, style, isActive, isDisabled, externalClassName} = props;
+    const {buttonSize, padding, image, imageAlt, href, onClick, style, isActive, isDisabled, externalClassName, title} = props;
     const imagePadding:number = !!padding ? padding : 10;
 
     const onClickHandler = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -57,6 +58,7 @@ export const ImageButton = React.forwardRef((props: ImageButtonProps, ref: Legac
         >
             {!!href && <a href={href} style={imageStyle} target="_blank" rel="noopener noreferrer">
                 <img
+                    title={title}
                     draggable={false}
                     alt={imageAlt}
                     src={image}
@@ -64,6 +66,7 @@ export const ImageButton = React.forwardRef((props: ImageButtonProps, ref: Legac
                 />
             </a>}
             {!href && <img
+                title={title}
                 draggable={false}
                 alt={imageAlt}
                 src={image}

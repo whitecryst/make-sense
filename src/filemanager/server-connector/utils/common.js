@@ -8,6 +8,7 @@ export function normalizeResource(resource) {
       name: resource.name,
       type: resource.type,
       size: resource.size,
+      ktk_id: resource.ktk_id,
       parentId: resource.parentId ? resource.parentId : null,
       ancestors: resource.ancestors ? resource.ancestors : null
     };

@@ -5,6 +5,7 @@ import fetchAndUse from './fetchAndUse';
 import upload from './upload';
 import rename from './rename';
 import sort from './sort';
+import ktkAssignImageSeries from './ktkAssignImageSeries';
 
 const capabilities = [
   createFolder,
@@ -13,7 +14,8 @@ const capabilities = [
   upload,
   deleteResource,
   fetchAndUse,
-  sort
+  sort,
+  ktkAssignImageSeries
 ];
 
 /**

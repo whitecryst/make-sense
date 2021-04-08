@@ -57,7 +57,7 @@ const ImagesDropZone: React.FC<IProps> = ({updateActiveImageIndex, addImageData,
         console.log(b);
     };
 
-    const loadImagesFromGoogleSheets = async () => {
+    /*const loadImagesFromGoogleSheets = async () => {
         console.log("try to connect to google sheets");
         const { GoogleSpreadsheet } = require('google-spreadsheet');
 
@@ -116,7 +116,7 @@ const ImagesDropZone: React.FC<IProps> = ({updateActiveImageIndex, addImageData,
     
         //addImageData(images.map((fileData:File) => ImageDataUtil.createImageDataFromFileData(fileData)));
   
-    };
+    };*/
 
     const getDropZoneContent = () => {
         

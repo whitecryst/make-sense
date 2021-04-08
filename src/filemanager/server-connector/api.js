@@ -1,5 +1,6 @@
 import request from 'superagent';
 import { normalizeResource } from './utils/common';
+import { KtkSelector } from '.././../store/selectors/KtkSelector';
 
 /**
  * hasSignedIn
@@ -30,14 +31,19 @@ async function getResourceById(options, id) {
   const route = `${options.apiRoot}/files/${id}`;
   const method = 'GET';
   const response = await request(method, route);
-  return normalizeResource(response.body);
+  addKtkIdToResource(response.body);
+  let r = normalizeResource(response.body);
+  
+  return r;
 }
 
 async function getChildrenForId(options, { id, sortBy = 'name', sortDirection = 'ASC' }) {
   const route = `${options.apiRoot}/files/${id}/children?orderBy=${sortBy}&orderDirection=${sortDirection}`;
   const method = 'GET';
   const response = await request(method, route);
-  return response.body.items.map(normalizeResource)
+  response.body.items.map(addKtkIdToResource)
+  let r = response.body.items.map(normalizeResource)
+  return r;
 }
 
 async function getParentsForId(options, id, result = []) {
@@ -52,10 +58,31 @@ async function getParentsForId(options, id, result = []) {
   return result;
 }
 
+async function addKtkIdToResource(resource) {
+  
+  //console.log( filePath );
+  let ktkData = KtkSelector.getImageSeriesContentByfilePath( resource );
+  
+  if( ktkData != null ) {
+    if( ktkData.seriesId == "0" && ktkData.imageId == "0" ) {
+      resource.ktk_id = "-";  
+    } else {
+      resource.ktk_id = ktkData.seriesId + "_" + ktkData.imageId;
+    }
+  } else {
+    resource.ktk_id = "-";
+  }
+  //resource.ktk_id = '666';
+}
+
 async function getBaseResource(options) {
   const route = `${options.apiRoot}/files`;
   const response = await request.get(route);
-  return normalizeResource(response.body);
+  addKtkIdToResource(response.body);
+  let r = normalizeResource(response.body);
+  
+  return r;
+
 }
 
 async function getIdForPartPath(options, currId, pathArr) {

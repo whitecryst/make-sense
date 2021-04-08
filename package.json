@@ -1,5 +1,5 @@
 {
-  "name": "KtK-CommandBridge",
+  "name": "ktk-commandbridge",
   "version": "0.1.0",
   "private": true,
   "proxy": "http://localhost:3001",
@@ -41,6 +41,7 @@
     "react-scripts": "^4.0.3",
     "react-spinners": "^0.10.6",
     "react-virtualized": "^9.22.3",
+    "react-widgets": "^4.6.1",
     "redux": "^4.0.5",
     "typescript": "4.2.2",
     "util": "^0.11.1",

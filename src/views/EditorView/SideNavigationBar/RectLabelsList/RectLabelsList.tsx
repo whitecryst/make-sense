@@ -43,6 +43,7 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
     };
 
     const deleteRectLabelById = (labelRectId: string) => {
+        console.log("onDelete: "+labelRectId);
         LabelActions.deleteRectLabelById(imageData.id, labelRectId);
     };
 
@@ -87,6 +88,7 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
                 value={labelRect.labelId !== null ? findLast(labelNames, {id: labelRect.labelId}) : null}
                 options={labelNames}
                 onSelectLabel={updateRectLabel}
+                imageData={imageData}
             />
         });
     };

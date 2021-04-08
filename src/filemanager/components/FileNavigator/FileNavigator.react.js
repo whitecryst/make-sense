@@ -213,7 +213,7 @@ class FileNavigator extends Component {
 
     const resourceChildren = await this.getChildrenForId(resource.id, sortBy, sortDirection);
 
-    const newSelection = (typeof idToSelect === 'undefined' || idToSelect === null) ? [] : [idToSelect];
+    const newSelection = (typeof idToSelect === 'undefined' || idToSelect === null) ? [] : Array.isArray(idToSelect) ? idToSelect : [idToSelect];
 
     if (changeHistory) {
       this.setStateAsync({ history: pushToHistory(history, toId) });
@@ -312,8 +312,7 @@ class FileNavigator extends Component {
     const isDirectory = rowData.type === 'dir';
     if (isDirectory) {
       this.navigateToDir(id);
-    }
-
+    } 
     this.focusView();
 
     this.props.onResourceItemDoubleClick({ event, number, rowData });
@@ -545,6 +544,6 @@ export default connect(
   mapDispatchToProps
 )(FileNavigator);
 
-//export default FileNavigator;
 FileNavigator.propTypes = propTypes;
 FileNavigator.defaultProps = defaultProps;
+

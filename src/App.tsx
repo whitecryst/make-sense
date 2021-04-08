@@ -12,6 +12,10 @@ import {Settings} from "./settings/Settings";
 import {SizeItUpView} from "./views/SizeItUpView/SizeItUpView";
 import {PlatformModel} from "./staticModels/PlatformModel";
 import classNames from "classnames";
+import { KtkActions } from './logic/actions/KtkActions';
+import { updateImageSeriesContent } from './store/ktk/actionCreators';
+import { store } from '.';
+import { KtkSelector } from './store/selectors/KtkSelector';
 
 interface IProps {
     projectType: ProjectType;
@@ -21,6 +25,18 @@ interface IProps {
 }
 
 const App: React.FC<IProps> = ({projectType, windowSize, ObjectDetectorLoaded, PoseDetectionLoaded}) => {
+    if( KtkSelector.getImageSeriesMetaSize() == 0 ) {
+        KtkActions.loadImageSeriesMeta();
+    }
+    if( KtkSelector.getImageSeriesContentSize() == 0 ) {
+        KtkActions.loadImageSeriesContent();
+    }
+    if( KtkSelector.getSymbolsContentSize() == 0 ) {
+        KtkActions.LoadSymbolsContent();
+    }
+    
+    
+
     const selectRoute = () => {
         if (!!PlatformModel.mobileDeviceData.manufacturer && !!PlatformModel.mobileDeviceData.os)
             return <MobileMainView/>;
@@ -45,6 +61,10 @@ const App: React.FC<IProps> = ({projectType, windowSize, ObjectDetectorLoaded, P
       );
 };
 
+const mapDispatchToProps = {
+    updateImageSeriesContent
+};
+
 const mapStateToProps = (state: AppState) => ({
     projectType: state.general.projectData.type,
     windowSize: state.general.windowSize,
@@ -53,5 +73,6 @@ const mapStateToProps = (state: AppState) => ({
 });
 
 export default connect(
-    mapStateToProps
+    mapStateToProps,
+    mapDispatchToProps
 )(App);

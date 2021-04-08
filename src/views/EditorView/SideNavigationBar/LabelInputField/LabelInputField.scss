@@ -122,7 +122,8 @@
       }
 
       .ImageButton {
-        transition: transform 0.3s;
+        background:$darkThemeThirdColor;
+        transition: transform 0.1s;
 
         img {
           filter: brightness(0) invert(1);
@@ -133,8 +134,8 @@
         }
 
         &.trash:not(.disabled):hover {
-          filter: brightness(35%) sepia(100%) hue-rotate(172deg) saturate(2000%); // fallback if new css variables are not supported by browser
-          filter: brightness(35%) sepia(100%) hue-rotate(var(--hue-value)) saturate(2000%);
+          filter: brightness(55%) sepia(100%) hue-rotate(172deg) saturate(2000%); // fallback if new css variables are not supported by browser
+          filter: brightness(55%) sepia(100%) hue-rotate(var(--hue-value)) saturate(2000%);
         }
       }
     }

@@ -10,9 +10,25 @@ import {Tooltip} from "@material-ui/core";
 import Fade from "@material-ui/core/Fade";
 import withStyles from "@material-ui/core/styles/withStyles";
 import ImagesDropZone from "./ImagesDropZone/ImagesDropZone";
+import { KtkSelector } from '../../store/selectors/KtkSelector';
 const MainView: React.FC = () => {
     const [projectInProgress, setProjectInProgress] = useState(false);
     const [projectCanceled, setProjectCanceled] = useState(false);
+    const [ktkLoading, setKtkLoading] = useState(true);
+
+    
+    const waitLoading = async () => {
+        
+        while( KtkSelector.getImageSeriesContentSize() == 0 ) {
+            await new Promise(r => setTimeout(r, 1000));
+        }
+        if( ktkLoading == true) {
+            setKtkLoading(false);
+        }
+        
+    }
+
+    waitLoading();
 
     const startProject = () => {
         setProjectInProgress(true);
@@ -124,10 +140,9 @@ const MainView: React.FC = () => {
                 <div className="SocialMediaWrapper">
                     {getSocialMediaButtons({width: 30, height: 30})}
                 </div>
-                {!projectInProgress && <TextButton
+                {!projectInProgress && (KtkSelector.getImageSeriesContentSize() > 0) && <TextButton
                     label={"Get Started"}
-                    onClick={startProject}
-                />}
+                    onClick={startProject}/> || (KtkSelector.getImageSeriesContentSize() == 0) && <TextButton label={"Loading..."} /> }
             </div>
         </div>
     );
