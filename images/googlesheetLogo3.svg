@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   inkscape:version="1.0 (4035a4f, 2020-05-01)"
+   sodipodi:docname="googlesheetLogo2.svg"
+   id="svg844"
+   version="1.1"
+   viewBox="0 0 24 24">
+  <metadata
+     id="metadata850">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs848" />
+  <sodipodi:namedview
+     inkscape:current-layer="Google_Sheets"
+     inkscape:window-maximized="0"
+     inkscape:window-y="25"
+     inkscape:window-x="0"
+     inkscape:cy="12"
+     inkscape:cx="12"
+     inkscape:zoom="28.041667"
+     showgrid="false"
+     id="namedview846"
+     inkscape:window-height="921"
+     inkscape:window-width="1335"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0"
+     guidetolerance="10"
+     gridtolerance="10"
+     objecttolerance="10"
+     borderopacity="1"
+     bordercolor="#666666"
+     pagecolor="#ffffff" />
+  <g
+     style="opacity:1;stroke-width:1.0015748;stroke-miterlimit:4;stroke-dasharray:none"
+     id="Google_Sheets"
+     data-name="Google Sheets">
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-width:1.00157;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="_Path_"
+       data-name="&lt;Path&gt;"
+       d="M 20.5,5.5 V 22 A 1.5,1.5 0 0 1 19,23.5 H 5 A 1.5,1.5 0 0 1 3.5,22 V 2 A 1.5,1.5 0 0 1 5,0.5 h 10.5 z" />
+    <path
+       style="fill:#000000;fill-opacity:1;stroke:#ffffff;stroke-width:1.00157;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       id="_Path_2"
+       data-name="&lt;Path&gt;"
+       d="M 15.5,0.5 V 4 A 1.5,1.5 0 0 0 17,5.5 h 3.5" />
+    <rect
+       data-name="&lt;Rectangle&gt;"
+       height="9"
+       id="_Rectangle_"
+       style="fill:none;stroke:#fffff2;stroke-width:1.00157;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       width="9"
+       x="7.5"
+       y="9.5" />
+    <line
+       data-name="&lt;Path&gt;"
+       id="_Path_3"
+       style="fill:none;stroke:#fffff2;stroke-width:1.00157;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       x1="7.5"
+       x2="16.5"
+       y1="12.5"
+       y2="12.5" />
+    <line
+       data-name="&lt;Path&gt;"
+       id="_Path_4"
+       style="fill:none;stroke:#fffff2;stroke-width:1.00157;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       x1="7.5"
+       x2="16.5"
+       y1="15.5"
+       y2="15.5" />
+    <line
+       data-name="&lt;Path&gt;"
+       id="_Path_5"
+       style="fill:none;stroke:#fffff2;stroke-width:1.00157;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+       x1="11"
+       x2="11"
+       y1="9.5"
+       y2="18.5" />
+  </g>
+</svg>
