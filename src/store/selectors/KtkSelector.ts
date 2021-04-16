@@ -45,7 +45,9 @@ export class KtkSelector {
             let newCnt:ImageSeriesContent = {
                 seriesId: "0",
                 imageId: "0",
-                url: imgUrl
+                url: imgUrl,
+                imageMap: "",
+                symbolIds: "",
             }; 
             store.dispatch( addImageSeriesContentRow(  newCnt ) );
             ktkImgCnt = newCnt;

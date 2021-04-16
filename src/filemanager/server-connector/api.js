@@ -67,8 +67,10 @@ async function addKtkIdToResource(resource) {
     if( ktkData.seriesId == "0" && ktkData.imageId == "0" ) {
       resource.ktk_id = "-";  
     } else {
-      resource.ktk_id = ktkData.seriesId + "_" + ktkData.imageId;
+      let hasAnnotationMarker = (ktkData.imageMap != null && ktkData.imageMap != "") ? " *" : "";
+      resource.ktk_id = ktkData.seriesId + "_" + ktkData.imageId+hasAnnotationMarker;
     }
+    resource.ktk_imageSeriesContent = ktkData;
   } else {
     resource.ktk_id = "-";
   }
@@ -122,6 +124,10 @@ async function getParentIdForResource(options, resource) {
 
 async function uploadFileToId({ apiOptions, parentId, file, onProgress }) {
   const route = `${apiOptions.apiRoot}/files`;
+  //console.log( route );
+  //console.log( parentId );
+  console.log( file );
+
   return request.post(route).
     field('type', 'file').
     field('parentId', parentId).

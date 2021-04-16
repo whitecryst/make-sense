@@ -41,7 +41,7 @@ const EditorContainer: React.FC<IProps> = (
         projectType
     }) => {
     const [leftTabStatusImages, setLeftTabStatusImages] = useState(true);
-    const [leftTabStatusFolders, setLeftTabStatusFolders] = useState(true);
+    const [leftTabStatusFolders, setLeftTabStatusFolders] = useState(false);
     const [rightTabStatus, setRightTabStatus] = useState(true);
 
     const calculateEditorSize = (): ISize => {
@@ -146,7 +146,8 @@ const EditorContainer: React.FC<IProps> = (
     };
 
     const rightSideBarRender = () => {
-        return <LabelsToolkit/>
+        return <LabelsToolkit 
+        />
     };
 
     return (

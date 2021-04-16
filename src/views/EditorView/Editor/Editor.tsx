@@ -210,7 +210,7 @@ class Editor extends React.Component<IProps, IState> {
                     />
                 })
         }
-        else if (this.props.activeLabelType === LabelType.POINT) {
+        else if (this.props.activeLabelType === LabelType.POINT && this.props.imageData) {
             return this.props.imageData.labelPoints
                 .filter((labelPoint: LabelPoint) => labelPoint.isCreatedByAI && labelPoint.status !== LabelStatus.ACCEPTED)
                 .map((labelPoint: LabelPoint) => {

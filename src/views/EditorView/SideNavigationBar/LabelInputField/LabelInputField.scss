@@ -171,3 +171,14 @@
     }
   }
 }
+
+.LabelSelectorInfo {
+  background:$darkThemeForthColor ;
+  //position: 'relative';
+  z-index: 100 ;
+  //width:'100%'; 
+  border-style: 'solid';
+  border-color:$darkThemeThirdColor;
+  border-width:'1px';
+  padding:'2px';
+}

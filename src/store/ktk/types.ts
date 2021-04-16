@@ -18,6 +18,8 @@ export type ImageSeriesContent = {
     seriesId: string;
     imageId: string;
     url: string;
+    imageMap: string;
+    symbolIds: string;
 } 
 
 

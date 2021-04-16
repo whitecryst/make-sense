@@ -18,7 +18,7 @@ export function addImageSeriesContentRow( imageSeriesContentRow: ImageSeriesCont
         payload: {
             imageSeriesContentRow
         }
-    }
+    };
 }
 
 export function updateImageSeriesContentRow( imageSeriesContentRow: ImageSeriesContent ): KtkActionTypes {
@@ -46,6 +46,16 @@ export function updateSymbolsContent(symbolsContent: SymbolsContent[]): KtkActio
         type: Action.UPDATE_SYMBOLS_CONTENT,
         payload: {
             symbolsContent
+        }
+    };
+}
+
+export function addSymbolsContentRow(symbolsContentRow: SymbolsContent): KtkActionTypes {
+    
+    return {
+        type: Action.ADD_SYMBOLS_CONTENT_ROW,
+        payload: {
+            symbolsContentRow
         }
     };
 }

@@ -19,6 +19,7 @@ import {findLast} from "lodash";
 import { v4 as uuidv4 } from 'uuid';
 import {TextButton} from "../../../Common/TextButton/TextButton";
 import { LabelUtil } from "../../../../utils/LabelUtil";
+import { KtkActions } from '../../../../logic/actions/KtkActions';
 
 interface IProps {
     size: ISize;
@@ -45,6 +46,8 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
     const deleteRectLabelById = (labelRectId: string) => {
         console.log("onDelete: "+labelRectId);
         LabelActions.deleteRectLabelById(imageData.id, labelRectId);
+        // upload data to google sheets
+        KtkActions.udateImageAnnotation( imageData );
     };
 
     const updateRectLabel = (labelRectId: string, labelNameId: string) => {
@@ -65,6 +68,10 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
         };
         updateImageDataById(imageData.id, newImageData);
         updateActiveLabelNameId(labelNameId);
+
+        // upload data to google sheets
+        KtkActions.udateImageAnnotation( imageData );
+
     };
 
     const onClickHandler = () => {

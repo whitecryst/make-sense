@@ -144,52 +144,7 @@ class LabelInputField extends React.Component<IProps, IState> {
         this.props.updateActiveLabelId(this.props.id);
     };
 
-    private addNewKtkSymbol = () => {
-        // find act RectLabel
-        
-        let rectLabel:LabelRect = null;
-        for( let rl of this.props.imageData.labelRects ) {
-            if( rl.id == this.props.id ) {
-                rectLabel = rl;
-                break;
-            }
-        }
-        if( rectLabel == null ) {
-            console.error( "unable to find act LabelRect in list:"+this.props.id  );
-            return null;
-        }
-        let canvas = this.resizeCropImg( this.props.imageData.fileData, rectLabel.rect );
-        return canvas;
-    }
-
-    private resizeCropImg = ( srcImg:File, cropArea:IRect ) => {
-        
-        //var canvas = document.createElement("canvas"); 
-        var ReactDOM = require('react-dom');
-        var canvas = ReactDOM.findDOMNode(this.refs.canvas);                
-        var context = canvas.getContext('2d');
-        var imageEl = new Image();
-
-        const reader = new FileReader();
-        reader.readAsDataURL(srcImg);
-        reader.onload = function(evt){
-            if( evt.target.readyState == FileReader.DONE) {
-                imageEl.src = evt.target.result as string;
-                var sourceX = cropArea.x;//150;
-                var sourceY = cropArea.y;//0;
-                var sourceWidth = cropArea.width;// 150;
-                var sourceHeight = cropArea.height;//150;
-                var destWidth = sourceWidth;
-                var destHeight = sourceHeight;
-                var destX = canvas.width / 2 - destWidth / 2;
-                var destY = canvas.height / 2 - destHeight / 2;
-
-                context.drawImage(imageEl, sourceX, sourceY, sourceWidth, sourceHeight, destX, destY, destWidth, destHeight);
-            }
-        }    
-        
-        return canvas.htm;
-    }
+    
 
     public render() {
         const {size, id, value, onDelete} = this.props;
@@ -197,8 +152,15 @@ class LabelInputField extends React.Component<IProps, IState> {
             <div style={{
                 width: size.width,
                 height: size.height,
-            }}><LabelSelect onDelete={onDelete} labelRectId={id} highlightLabel={this.mouseEnterHandler} onAdd={this.addNewKtkSymbol} />
-            <canvas ref="canvas" /> 
+            }}><LabelSelect 
+                onDelete={onDelete} 
+                labelRectId={id} 
+                highlightLabel={this.mouseEnterHandler} 
+                imageData={this.props.imageData}
+                onSelectLabel={ this.props.onSelectLabel }
+                //defaultSymbolId={ value ? value.id : "" }
+             />
+            
             {/*
             <div
                 className={this.getClassName()}

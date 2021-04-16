@@ -4,6 +4,7 @@ import {LabelType} from "../../data/enums/LabelType";
 import {IPoint} from "../../interfaces/IPoint";
 import {LabelStatus} from "../../data/enums/LabelStatus";
 import {ILine} from "../../interfaces/ILine";
+import { ImageSeriesContent } from "../ktk/types";
 
 export type LabelRect = {
     // GENERAL
@@ -61,6 +62,9 @@ export type ImageData = {
 
     // POSE NET
     isVisitedByPoseDetector: boolean;
+
+    //KtK
+    ktk_imageSeriesContent:ImageSeriesContent;
 }
 
 export type LabelsState = {

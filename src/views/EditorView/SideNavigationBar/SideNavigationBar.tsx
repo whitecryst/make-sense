@@ -9,6 +9,8 @@ interface IProps {
     isWithContext?: boolean;
     renderCompanion?: () => any;
     renderContent?: () => any;
+    api?: {};
+    apiOptions?:{}; 
 }
 
 export const SideNavigationBar: React.FC<IProps> = (props) => {

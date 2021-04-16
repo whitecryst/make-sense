@@ -27,7 +27,6 @@ export function ktkReducer(
                 ...state,
                 imageSeriesContent: state.imageSeriesContent.concat(action.payload.imageSeriesContentRow),
             }
-            
         }
         case Action.UPDATE_IMAGESERIES_CONTENT: {
             console.log("ktkReducer_UpdateImageSeriesContent");
@@ -41,6 +40,14 @@ export function ktkReducer(
             return {
                 ...state,
                 symbolsContent: action.payload.symbolsContent,
+            }
+        }
+       
+        case Action.ADD_SYMBOLS_CONTENT_ROW: {
+            console.log("ktkReducer_AddSymbolsContentRow");
+            return {
+                ...state,
+                symbolsContent: state.symbolsContent.concat(action.payload.symbolsContentRow),
             }
         }
        

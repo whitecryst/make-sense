@@ -24,6 +24,7 @@ import {EditorActions} from "../actions/EditorActions";
 import {GeneralSelector} from "../../store/selectors/GeneralSelector";
 import {LabelStatus} from "../../data/enums/LabelStatus";
 import {LabelUtil} from "../../utils/LabelUtil";
+import { KtkActions } from '../../logic/actions/KtkActions';
 
 export class RectRenderEngine extends BaseRenderEngine {
     private config: RenderEngineConfig = new RenderEngineConfig();
@@ -104,6 +105,8 @@ export class RectRenderEngine extends BaseRenderEngine {
                     return labelRect;
                 });
                 store.dispatch(updateImageDataById(imageData.id, imageData));
+                // upload data to google sheets
+                KtkActions.udateImageAnnotation( imageData );
             }
         }
         this.endRectTransformation()
@@ -229,7 +232,7 @@ export class RectRenderEngine extends BaseRenderEngine {
     private addRectLabel = (rect: IRect) => {
         const activeLabelId = LabelsSelector.getActiveLabelNameId();
         const imageData: ImageData = LabelsSelector.getActiveImageData();
-        const labelRect: LabelRect = LabelUtil.createLabelRect(activeLabelId, rect);
+        const labelRect: LabelRect = LabelUtil.createLabelRect(/*activeLabelId*/"", rect);
         imageData.labelRects.push(labelRect);
         store.dispatch(updateImageDataById(imageData.id, imageData));
         store.dispatch(updateFirstLabelCreatedFlag(true));

@@ -1,11 +1,13 @@
 //import {LabelsSelector} from "../../store/selectors/LabelsSelector";
 import {store} from "../../index";
-import {updateImageSeriesMeta, updateImageSeriesContent, updateImageSeriesContentRow, updateSymbolsContent} from "../../store/ktk/actionCreators";
+import {updateImageSeriesMeta, updateImageSeriesContent, updateImageSeriesContentRow, updateSymbolsContent, addSymbolsContentRow} from "../../store/ktk/actionCreators";
 import {ViewPortActions} from "./ViewPortActions";
 import {EditorModel} from "../../staticModels/EditorModel";
 import { ImageSeriesMeta, ImageSeriesContent, SymbolsContent } from "../../store/ktk/types";
 import { KtkSelector } from "../../store/selectors/KtkSelector";
 import { COCOAnnotationsLoadingError } from "../import/coco/COCOErrors";
+import {ImageData, LabelName, LabelRect} from "../../store/labels/types";
+import { toInteger } from "lodash";
 
 export class KtkActions {
 
@@ -77,7 +79,7 @@ export class KtkActions {
         console.log(sheet.title);
         console.log( numrows );
         // read cells
-        await sheet.loadCells('A1:D'+sheet.rowCount);
+        await sheet.loadCells('A1:G'+sheet.rowCount);
         
         // read/write row values
         
@@ -85,11 +87,15 @@ export class KtkActions {
         for (var i = 1; i < numrows; i++) { // numrows
             let seriesId = sheet.getCell(i, 0).value;
             let actImageId = sheet.getCell(i, 1).value;
-            let actImageUrl = sheet.getCell(i, 2).value;     
+            let actImageUrl = sheet.getCell(i, 2).value; 
+            let actImageMap = sheet.getCell(i, 4).value; 
+            let actSymbolIds = sheet.getCell(i, 5).value;     
             let actContent:ImageSeriesContent = {
                 seriesId: seriesId,
                 imageId: actImageId,
-                url: actImageUrl
+                url: actImageUrl,
+                imageMap: actImageMap,
+                symbolIds: actSymbolIds
             }; 
             //console.log( "download image: "+imageUrl ); 
             //console.log(actImageUrl);
@@ -99,11 +105,82 @@ export class KtkActions {
         //console.log("content:");
         //console.log(content);
         store.dispatch( updateImageSeriesContent(content) );
-        console.log( "KtK ImageSeriesContent updated" );
-            
+        console.log( "KtK ImageSeriesContent updated" );  
           
     }
 
+    public static async udateImageAnnotation( imageData:ImageData ): Promise<any> {
+        let iSC:ImageSeriesContent = imageData.ktk_imageSeriesContent;
+
+        if( iSC.imageId == "0" || iSC.seriesId == "0" ) {
+            console.log( "unable to update annotation for image without imageSeriesId" );
+            return null;
+        }
+
+        console.log("try to connect to google sheets");
+        const { GoogleSpreadsheet } = require('google-spreadsheet');
+        const creds = require('../../GoogleSheetCredentials.json'); // the file saved above
+        // Initialize the sheet - doc ID is the long id in the sheets URL
+        const doc = new GoogleSpreadsheet('17Mdd7GZFlaZ169M7bJqiUf5WV437MCZ25_Hw9fgfJF8');
+        await doc.useServiceAccountAuth(creds);
+        await doc.loadInfo(); // loads document properties and worksheets
+        console.log(doc.title);
+        const sheet = doc.sheetsByTitle['ImageSeriesContentTest']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+        const numrows = sheet.rowCount;
+        console.log(sheet.title);
+        await sheet.loadCells('A1:G'+numrows);
+        
+        //find rowNr to insert image content
+        let existingRowNr = null;
+        for( let rowNr = 1; rowNr < numrows; rowNr++ ) {
+            //get cells from act sheet row
+            let seriesIdCell = sheet.getCell(rowNr, 0);
+            let imageIdCell = sheet.getCell(rowNr, 1);
+            let urlCell = sheet.getCell(rowNr, 2);
+
+            // if act row is of the same image series and image id
+            if( String(seriesIdCell.value).localeCompare(iSC.seriesId) == 0 &&
+                String(urlCell.value).localeCompare(iSC.url) == 0 && 
+                String(imageIdCell.value).localeCompare(iSC.imageId) == 0 ) {
+                if( existingRowNr != null ) {
+                    console.error( "Image has more than one entry!!! rowNrs:"+existingRowNr+","+rowNr );
+                }
+                existingRowNr = rowNr;
+            }
+        } 
+             
+        if( existingRowNr != null ) {
+            // create image Map
+
+            let imageMap:String = imageData.labelRects.map( r => "rect "+toInteger(r.rect.x)+" "+toInteger(r.rect.y)+" "+toInteger(r.rect.x+r.rect.width)+" "+toInteger(r.rect.y+r.rect.height)+" [["+r.labelId+"]]" ).join("\n");
+
+            //create List of symbolIds
+            let symbolIds:String = imageData.labelRects.map(r => r.labelId).join(",");
+
+            console.log( "existing:"+existingRowNr );
+            let rowToUpdate = existingRowNr;
+            let imageMapCell = sheet.getCell(rowToUpdate, 4);
+            let symbolIdsCell = sheet.getCell(rowToUpdate, 5);
+
+            // update the cell contents and formatting
+            let date = new Date().toLocaleString()
+            imageMapCell.value = imageMap;
+            symbolIdsCell.value = symbolIds;
+            imageMapCell.note = 'Updated via KtK-Commandbridge at '+ date;
+            symbolIdsCell.note = 'Updated via KtK-Commandbridge at '+ date;
+            await sheet.saveUpdatedCells(); // save all updates in one call
+            console.log("...updated sheet!");
+        } else {
+            console.error( "unable to find existing imageSeriesContent row: "+iSC.seriesId+"_"+iSC.imageId );
+        }
+        
+    }
+
+    /**
+     * add or update id and image url data for a row (picture) in sheet ImageSeriesContent
+     * @param newImageSeriesMeta 
+     * @param selectedResources 
+     */
     public static async upsertImageSeriesContentRow( newImageSeriesMeta:ImageSeriesMeta, selectedResources ): Promise<any> {
         
         console.log("try to connect to google sheets");
@@ -148,7 +225,7 @@ export class KtkActions {
                         existingRowNr = rowNr;
                     }
                 } else { // if image has no entry in sheets, search for next free row and calc newImageID
-                    console.log("here we go")
+                    //console.log("here we go")
                     // check if act row is next empty row
                     if( !seriesIdCell.value && !imageIdCell.value && !urlCell.value && !nextEmptyRowNr) {
                         nextEmptyRowNr = rowNr;
@@ -272,4 +349,73 @@ export class KtkActions {
         
     };
     
+    public static async addSymbolsContentRow( symbolsContentRow:SymbolsContent ): Promise<any> {
+        
+        console.log("try to connect to google sheets");
+        const { GoogleSpreadsheet } = require('google-spreadsheet');
+        const creds = require('../../GoogleSheetCredentials.json'); // the file saved above
+        // Initialize the sheet - doc ID is the long id in the sheets URL
+        const doc = new GoogleSpreadsheet('17Mdd7GZFlaZ169M7bJqiUf5WV437MCZ25_Hw9fgfJF8');
+        await doc.useServiceAccountAuth(creds);
+        await doc.loadInfo(); // loads document properties and worksheets
+        console.log(doc.title);
+        const sheet = doc.sheetsByTitle['ImageSymbolsTest']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+        const numrows = sheet.rowCount;
+        console.log(sheet.title);
+        console.log( numrows ); 
+        await sheet.loadCells('A1:H'+numrows);
+        
+        //find rowNr to insert image content
+        let nextEmptyRowNr = null;
+        
+        let newSymbolId = 1;
+        for( let rowNr = 1; rowNr <= numrows; rowNr++ ) {
+            //get cells from act sheet row
+            let symbolIdCell = sheet.getCell(rowNr, 0);
+            let categoryCell = sheet.getCell(rowNr, 1);
+            let nameCell = sheet.getCell(rowNr, 2);  
+            let descriptionCell = sheet.getCell(rowNr, 4);
+            let fullnameCell = sheet.getCell(rowNr, 7);  
+
+            // search for next free row and calc newImageID
+            // check if act row is next empty row
+            if( !symbolIdCell.value && !categoryCell.value && !nameCell.value && !descriptionCell.value && !fullnameCell.value) {
+                nextEmptyRowNr = rowNr;
+                break
+            } else { //if not empty row, use to calc next free symbolId
+                if( Number(symbolIdCell.value) >= newSymbolId ) {
+                    newSymbolId = Number(symbolIdCell.value) + 1;
+                }
+            }
+        }
+
+        console.log( "nextEmpty:"+nextEmptyRowNr );
+        console.log( "newSymbolId:"+newSymbolId );
+        let rowToUpdate = nextEmptyRowNr;
+        let symbolIdCell = sheet.getCell(rowToUpdate, 0);
+        let categoryCell = sheet.getCell(rowToUpdate, 1);
+        let nameCell = sheet.getCell(rowToUpdate, 2);  
+        let imageCell = sheet.getCell(rowToUpdate, 3);  
+        let descriptionCell = sheet.getCell(rowToUpdate, 4);
+        let fullnameCell = sheet.getCell(rowToUpdate, 7);  
+
+        // update the cell contents and formatting
+        symbolIdCell.value = newSymbolId;
+        symbolIdCell.note = 'Inserted via KtK-Commandbridge at '+ new Date().toLocaleString();
+        categoryCell.value = symbolsContentRow.category;
+        nameCell.value = symbolsContentRow.name;
+        descriptionCell.value = symbolsContentRow.description;
+        fullnameCell.value = symbolsContentRow.fullname;
+        imageCell.value ='=IMAGE( QUERY(IMPORTRANGE("17Mdd7GZFlaZ169M7bJqiUf5WV437MCZ25_Hw9fgfJF8", "ImageSeriesContent!A2:E10000"), "SELECT Col3 WHERE Col1=43 AND Col2="&A'+(rowToUpdate+1)+') )';
+        await sheet.saveUpdatedCells(); // save all updates in one call
+        console.log("...updated sheet!");
+        // update imageSeriesContent in redux store
+        symbolsContentRow.symbolId = String(newSymbolId);
+        
+        store.dispatch( addSymbolsContentRow( symbolsContentRow ) );
+        console.log("...updated store!");
+                
+        return newSymbolId;    
+        
+    }
 }

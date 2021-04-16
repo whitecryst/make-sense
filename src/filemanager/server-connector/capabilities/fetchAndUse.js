@@ -7,6 +7,7 @@ import icons from '../icons-svg';
 import getMess from '../translations';
 import request from 'superagent';
 import {ImageDataUtil} from "../../../utils/ImageDataUtil";
+import {LabelUtil} from "../../../utils/LabelUtil";
 
 
 const label = 'annotate';
@@ -95,7 +96,7 @@ async function handler(apiOptions, actions) {
       const resources = getSelectedResources();
       
       for( var actResource of resources ){
-        const { id, name } = actResource;
+        const { id, name, ktk_imageSeriesContent } = actResource;
         const downloadUrl = `${apiOptions.apiRoot}/download?items=${id}`;
         const res = await request.get(downloadUrl).
         responseType('blob').
@@ -103,13 +104,38 @@ async function handler(apiOptions, actions) {
           onProgress(event.percent);
         });
 
-        console.log(res.body);
+        //console.log(res.body);
         var b = res.body;
         //A Blob() is almost a File() - it's just missing the two properties below which we will add
         b.lastModifiedDate = new Date();
         b.name = "test.jpg";
-        
-        addImageData( ImageDataUtil.createImageDataFromFileData(b) );
+        let newImageData = ImageDataUtil.createImageDataFromFileData(b);
+
+        // now add ktk imageSeries data
+        newImageData.ktk_imageSeriesContent = ktk_imageSeriesContent;
+
+        // add existing annotations if available
+        if( ktk_imageSeriesContent != null ) {
+          if( ktk_imageSeriesContent.imageMap != null && ktk_imageSeriesContent.symbolIds != null) {
+            // set labelNameIds (symbolIds)
+            newImageData.labelnameIds = ktk_imageSeriesContent.symbolIds.split(",");
+            
+            let rectLabelStrings = ktk_imageSeriesContent.imageMap.split("\n");
+            for( let actRectLabelString of rectLabelStrings ) {
+              let actRLParts = actRectLabelString.split(" ");
+              if( actRLParts.length >= 6 ) {
+                let rect = {x:Number(actRLParts[1]),
+                    y:Number(actRLParts[2]),
+                    height:Number(actRLParts[4])-Number(actRLParts[2]),
+                    width:Number(actRLParts[3])-Number(actRLParts[1])
+                  }
+                let newLabelRect = LabelUtil.createLabelRect(actRLParts[5].replaceAll("[","").replaceAll("]",""), rect);
+                newImageData.labelRects.push( newLabelRect );
+              }
+            }
+          }
+        }
+        addImageData( newImageData );
       }
 /*
       const quantity = resources.length;

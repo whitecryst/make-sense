@@ -15,7 +15,8 @@ export class ImageDataUtil {
             labelPolygons: [],
             labelNameIds: [],
             isVisitedByObjectDetector: false,
-            isVisitedByPoseDetector: false
+            isVisitedByPoseDetector: false,
+            ktk_imageSeriesContent: null
         }
     }
 
