@@ -20,6 +20,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {TextButton} from "../../../Common/TextButton/TextButton";
 import { LabelUtil } from "../../../../utils/LabelUtil";
 import { KtkActions } from '../../../../logic/actions/KtkActions';
+import { SymbolsContent } from '../../../../store/ktk/types';
 
 interface IProps {
     size: ISize;
@@ -28,7 +29,7 @@ interface IProps {
     activeLabelId: string;
     highlightedLabelId: string;
     updateActiveLabelNameId: (activeLabelId: string) => any;
-    labelNames: LabelName[];
+    labelNames: SymbolsContent[];
     updateActiveLabelId: (activeLabelId: string) => any;
 }
 

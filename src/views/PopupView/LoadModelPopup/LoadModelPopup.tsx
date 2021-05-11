@@ -16,11 +16,11 @@ interface SelectableModel {
 }
 
 const models: SelectableModel[] = [
-    {
+    /*{
         model: AIModel.OBJECT_DETECTION,
         name: "COCO SSD - object detection using rectangles",
         flag: false
-    },
+    },*/
     {
         model: AIModel.POSE_DETECTION,
         name: "POSE-NET - pose estimation using points",
@@ -103,9 +103,8 @@ export const LoadModelPopup: React.FC = () => {
     const renderContent = () => {
         return <div className="LoadModelPopupContent">
             <div className="Message">
-                To speed up your work, you can use our AI, which will try to mark objects on your images. Don't worry,
-                your photos are still safe. To take care of your privacy, we decided not to send your images to the
-                server, but instead send our AI to you. When accepting, make sure that you have a fast and stable
+                To speed up the annotation process, you can use an AI, which will try to mark objects on the images. 
+                 When accepting, make sure that you have a fast and stable
                 connection - it may take a few minutes to load the model.
             </div>
             <div className="Companion">
@@ -130,7 +129,7 @@ export const LoadModelPopup: React.FC = () => {
             acceptLabel={"Use model!"}
             onAccept={onAccept}
             disableAcceptButton={modelIsLoadingStatus || !extractSelectedModel()}
-            rejectLabel={"I'm going on my own"}
+            rejectLabel={"Cancel"}
             onReject={onReject}
             disableRejectButton={modelIsLoadingStatus}
         />

@@ -98,7 +98,7 @@ async function handler(apiOptions, actions) {
       for( var actResource of resources ){
         const { id, name, ktk_imageSeriesContent } = actResource;
         const downloadUrl = `${apiOptions.apiRoot}/download?items=${id}`;
-        const res = await request.get(downloadUrl).
+        const res = await request.get(downloadUrl).set('Authorization', 'Basic ' + btoa('kungfu:V2KeedPRaqQ8')).
         responseType('blob').
         on('progress', event => {
           onProgress(event.percent);

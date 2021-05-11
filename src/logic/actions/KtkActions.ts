@@ -8,6 +8,7 @@ import { KtkSelector } from "../../store/selectors/KtkSelector";
 import { COCOAnnotationsLoadingError } from "../import/coco/COCOErrors";
 import {ImageData, LabelName, LabelRect} from "../../store/labels/types";
 import { toInteger } from "lodash";
+import { convertCompilerOptionsFromJson } from "typescript";
 
 export class KtkActions {
 
@@ -125,7 +126,7 @@ export class KtkActions {
         await doc.useServiceAccountAuth(creds);
         await doc.loadInfo(); // loads document properties and worksheets
         console.log(doc.title);
-        const sheet = doc.sheetsByTitle['ImageSeriesContentTest']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+        const sheet = doc.sheetsByTitle['ImageSeriesContent']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
         const numrows = sheet.rowCount;
         console.log(sheet.title);
         await sheet.loadCells('A1:G'+numrows);
@@ -155,19 +156,52 @@ export class KtkActions {
             let imageMap:String = imageData.labelRects.map( r => "rect "+toInteger(r.rect.x)+" "+toInteger(r.rect.y)+" "+toInteger(r.rect.x+r.rect.width)+" "+toInteger(r.rect.y+r.rect.height)+" [["+r.labelId+"]]" ).join("\n");
 
             //create List of symbolIds
-            let symbolIds:String = imageData.labelRects.map(r => r.labelId).join(",");
+            let symbolIdsArr:String[] = imageData.labelRects.map(r => r.labelId);
+            let symbolIds:String = symbolIdsArr.join(",");
 
+            console.log( symbolIdsArr );
+            
+            // create hash of symbol ids to identify techniques
+            const symbols = KtkSelector.getSymbolsContent() ;
+            const leftHandSymbol = symbols.find( s => s.category.includes( "Left Hand posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
+            const rightHandSymbol = symbols.find( s => s.category.includes( "Right Hand posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
+            const leftArmSymbol = symbols.find( s => s.category.includes( "Left Arm posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
+            const rightArmSymbol = symbols.find( s => s.category.includes( "Right Arm posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
+            const leftLegSymbol = symbols.find( s => s.category.includes( "Left Leg posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
+            const rightLegSymbol = symbols.find( s => s.category.includes( "Right Leg posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
+            const leftFootSymbol = symbols.find( s => s.category.includes( "Left Foot posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
+            const rightFootSymbol = symbols.find( s => s.category.includes( "Right Foot posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
+            const bodySymbol = symbols.find( s => s.category.includes( "Body posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
+            
+
+            const handTechniqueHash:String = (leftHandSymbol != undefined ? leftHandSymbol.symbolId : "_")+ ","
+             +  (leftArmSymbol != undefined ? leftArmSymbol.symbolId : "_") + "|"
+             +  (rightHandSymbol != undefined ? rightHandSymbol.symbolId : "_") + ","
+             +  (rightArmSymbol != undefined ? rightArmSymbol.symbolId : "_") + "|"
+             +  (bodySymbol != undefined ? bodySymbol.symbolId : "_");
+
+            const footTechniqueHash:String = ""
+             +  (leftFootSymbol != undefined ? leftFootSymbol.symbolId : "_") + ","
+             +  (leftLegSymbol != undefined ? leftLegSymbol.symbolId : "_") + "|"
+             +  (rightFootSymbol != undefined ? rightFootSymbol.symbolId : "_") + ","
+             +  (rightLegSymbol != undefined ? rightLegSymbol.symbolId : "_");
+             
+            const kungfuTechniqueHash:String = handTechniqueHash + "#" + footTechniqueHash;
+            console.log( "kungfuTechniqueHash:"+kungfuTechniqueHash );
             console.log( "existing:"+existingRowNr );
             let rowToUpdate = existingRowNr;
             let imageMapCell = sheet.getCell(rowToUpdate, 4);
             let symbolIdsCell = sheet.getCell(rowToUpdate, 5);
+            let symbolIdsHashCell = sheet.getCell(rowToUpdate, 6);
 
             // update the cell contents and formatting
             let date = new Date().toLocaleString()
             imageMapCell.value = imageMap;
             symbolIdsCell.value = symbolIds;
+            symbolIdsHashCell.value = kungfuTechniqueHash;
             imageMapCell.note = 'Updated via KtK-Commandbridge at '+ date;
             symbolIdsCell.note = 'Updated via KtK-Commandbridge at '+ date;
+            symbolIdsHashCell.note = 'Updated via KtK-Commandbridge at '+ date;
             await sheet.saveUpdatedCells(); // save all updates in one call
             console.log("...updated sheet!");
         } else {
@@ -191,7 +225,7 @@ export class KtkActions {
         await doc.useServiceAccountAuth(creds);
         await doc.loadInfo(); // loads document properties and worksheets
         console.log(doc.title);
-        const sheet = doc.sheetsByTitle['ImageSeriesContentTest']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+        const sheet = doc.sheetsByTitle['ImageSeriesContent']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
         const numrows = sheet.rowCount;
         console.log(sheet.title);
         console.log( numrows ); 
@@ -254,8 +288,8 @@ export class KtkActions {
             let urlCell = sheet.getCell(rowToUpdate, 2);  
 
             // update the cell contents and formatting
-            seriesIdCell.value = newImageSeriesMeta.seriesId;
-            imageIdCell.value = newImageId;
+            seriesIdCell.value = Number(newImageSeriesMeta.seriesId);
+            imageIdCell.value = Number(newImageId);
             urlCell.value = existingImageSeriesContentRow.url;
             seriesIdCell.note = 'Updated via KtK-Commandbridge at '+ new Date().toLocaleString();
             await sheet.saveUpdatedCells(); // save all updates in one call
@@ -268,6 +302,60 @@ export class KtkActions {
                 
             
         }
+    }
+
+    /**
+     * add or update id and image url data for a row (picture) in sheet ImageSeriesContent
+     * @param newImageSeriesMeta 
+     * @param selectedResources 
+     */
+     public static async addImageSeriesContentRow( newImageSeriesContentRow:ImageSeriesContent ): Promise<any> {
+        
+        console.log("try to connect to google sheets");
+        const { GoogleSpreadsheet } = require('google-spreadsheet');
+        const creds = require('../../GoogleSheetCredentials.json'); // the file saved above
+        // Initialize the sheet - doc ID is the long id in the sheets URL
+        const doc = new GoogleSpreadsheet('17Mdd7GZFlaZ169M7bJqiUf5WV437MCZ25_Hw9fgfJF8');
+        await doc.useServiceAccountAuth(creds);
+        await doc.loadInfo(); // loads document properties and worksheets
+        console.log(doc.title);
+        const sheet = doc.sheetsByTitle['ImageSeriesContent']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+        const numrows = sheet.rowCount;
+        console.log(sheet.title);
+        console.log( numrows ); 
+        await sheet.loadCells('A1:D'+numrows);
+        
+        //find rowNr to insert image content
+        let nextEmptyRowNr = null;
+        let existingRowNr = null;
+        for( let rowNr = 1; rowNr < numrows; rowNr++ ) {
+            //get cells from act sheet row
+            let seriesIdCell = sheet.getCell(rowNr, 0);
+            let imageIdCell = sheet.getCell(rowNr, 1);
+            let urlCell = sheet.getCell(rowNr, 2);  
+
+            // check if act row is next empty row
+            if( !seriesIdCell.value && !imageIdCell.value && !urlCell.value && !nextEmptyRowNr) {
+                nextEmptyRowNr = rowNr;
+                break
+            }
+        }
+        
+        console.log( "nextEmpty:"+nextEmptyRowNr );
+        let rowToUpdate = nextEmptyRowNr;
+        let seriesIdCell = sheet.getCell(rowToUpdate, 0);
+        let imageIdCell = sheet.getCell(rowToUpdate, 1);
+        let urlCell = sheet.getCell(rowToUpdate, 2);  
+
+        // update the cell contents and formatting
+        seriesIdCell.value = Number(newImageSeriesContentRow.seriesId);
+        imageIdCell.value = Number(newImageSeriesContentRow.imageId);
+        urlCell.value = newImageSeriesContentRow.url;
+        seriesIdCell.note = 'Updated via KtK-Commandbridge at '+ new Date().toLocaleString();
+        await sheet.saveUpdatedCells(); // save all updates in one call
+        console.log("...updated sheet!");
+        // update imageSeriesContent in redux store
+            
     }
 
     public static async LoadSymbolsContent(): Promise<any> {
@@ -334,7 +422,19 @@ export class KtkActions {
                         imgUrl: url,
                         fullname: fullName,
                     };
-                    content.push(actContent);
+                    // a posture symbol is either for left or right (arm, leg). later, this will beremoved when the side is determined by poseNet
+                    if( actContent.category.includes( "posture" ) && !actContent.category.includes( "Body" ) ) {
+                        //create to symbols for left and right
+                        let leftContent = Object.assign({}, actContent);
+                        let rightContent = Object.assign({}, actContent);
+                        leftContent.category = "Left "+leftContent.category;
+                        rightContent.category = "Right "+rightContent.category;
+                        content.push(leftContent);
+                        content.push(rightContent);
+                    } else {
+                        content.push(actContent);
+                    }
+                    
                     labelCount += 1;
                 }
             }
@@ -359,7 +459,7 @@ export class KtkActions {
         await doc.useServiceAccountAuth(creds);
         await doc.loadInfo(); // loads document properties and worksheets
         console.log(doc.title);
-        const sheet = doc.sheetsByTitle['ImageSymbolsTest']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+        const sheet = doc.sheetsByTitle['ImageSymbols']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
         const numrows = sheet.rowCount;
         console.log(sheet.title);
         console.log( numrows ); 
@@ -400,7 +500,7 @@ export class KtkActions {
         let fullnameCell = sheet.getCell(rowToUpdate, 7);  
 
         // update the cell contents and formatting
-        symbolIdCell.value = newSymbolId;
+        symbolIdCell.value = Number(newSymbolId);
         symbolIdCell.note = 'Inserted via KtK-Commandbridge at '+ new Date().toLocaleString();
         categoryCell.value = symbolsContentRow.category;
         nameCell.value = symbolsContentRow.name;

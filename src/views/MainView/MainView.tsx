@@ -119,7 +119,7 @@ const MainView: React.FC = () => {
                 </div>
             </div>
             
-            <div className="LeftColumn" style={{ backgroundImage: "url(/chinese3.jpg)" }}>
+            <div className="LeftColumn" style={{ backgroundImage: "url(/commandbridge/chinese3.jpg)" }}>
                 <div className={"LogoWrapper"}>
                     
                 </div>

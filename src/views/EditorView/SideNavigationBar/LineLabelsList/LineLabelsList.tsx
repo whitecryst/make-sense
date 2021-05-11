@@ -89,6 +89,7 @@ const LineLabelsList: React.FC<IProps> = (
                     value={labelLine.labelId !== null ? findLast(labelNames, {id: labelLine.labelId}) : null}
                     options={labelNames}
                     onSelectLabel={updateLineLabel}
+                    imageData={imageData}
                 />
             });
     };

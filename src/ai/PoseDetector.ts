@@ -33,12 +33,14 @@ export class PoseDetector {
             })
     }
 
-    public static predict(image: HTMLImageElement, callback?: (predictions: Pose[]) => any) {
+    public static predict(image: HTMLImageElement, callback?: (prediction: Pose[]) => any) {
         if (!PoseDetector.model) return;
 
         PoseDetector.model
-            .estimateMultiplePoses(image)
-            .then((predictions: Pose[]) => {
+            .estimateSinglePose(image)
+            //.estimateMultiplePoses(image)
+            .then((prediction: Pose/*[]*/) => {
+                let predictions:Pose[] = [prediction];
                 callback && callback(predictions)
             })
             .catch((error) => {

@@ -77,6 +77,7 @@ const PolygonLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataBy
                 value={labelPolygon.labelId !== null ? findLast(labelNames, {id: labelPolygon.labelId}) : null}
                 options={labelNames}
                 onSelectLabel={updatePolygonLabel}
+                imageData={imageData}
             />
         });
     };

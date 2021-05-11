@@ -50,7 +50,7 @@ export const DropDownMenuData: DropDownMenuNode[] = [
                 imageAlt: "export-labels",
                 disabled: false,
                 onClick: () => store.dispatch(updateActivePopupType(PopupWindowType.EXPORT_ANNOTATIONS))
-            },
+            }*/,
             {
                 name: "Load AI Model",
                 description: "Load our pre-trained annotation models",
@@ -58,7 +58,7 @@ export const DropDownMenuData: DropDownMenuNode[] = [
                 imageAlt: "load-ai-model",
                 disabled: false,
                 onClick: () => store.dispatch(updateActivePopupType(PopupWindowType.LOAD_AI_MODEL))
-            },*/
+            }
         ]
     },
     {

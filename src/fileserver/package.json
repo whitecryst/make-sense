@@ -1,0 +1,1 @@
+{"scripts":{"preinstall":"npx npm-force-resolutions"},"resolutions":{"helmet-csp":"^2.10.0","lodash":"^4.17.15","minimist":"^1.2.5"},"dependencies":{"@opuscapita/filemanager-server":"^1.1.4","bowser":"^2.11.0","express":"^4.17.1","express-basic-auth":"^1.2.0","fs":"*"}}

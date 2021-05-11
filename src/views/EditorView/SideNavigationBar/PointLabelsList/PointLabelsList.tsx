@@ -91,6 +91,7 @@ const PointLabelsList: React.FC<IProps> = (
                 value={labelPoint.labelId !== null ? findLast(labelNames, {id: labelPoint.labelId}) : null}
                 options={labelNames}
                 onSelectLabel={updatePointLabel}
+                imageData={imageData}
             />
         });
     };

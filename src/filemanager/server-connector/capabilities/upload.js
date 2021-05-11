@@ -7,6 +7,7 @@ import { readLocalFile } from '../utils/upload';
 import icons from '../icons-svg';
 import getMess from '../translations';
 import { normalizeResource } from '../utils/common';
+import { forEach } from 'jszip';
 
 const label = 'upload';
 
@@ -75,11 +76,15 @@ async function handler(apiOptions, actions) {
 
   const resource = getResource();
   try {
-    const file = await readLocalFile(true);
+    //const file = await readLocalFile(true);
     // TODO: reactivate this line (throws error)
-    onStart({ name: file.name, size: file.file.size });
-    const response = await api.uploadFileToId({ apiOptions, parentId: resource.id, file, onProgress });
-    const newResource = normalizeResource(response.body[0]);
+    const files = await readLocalFile(true);
+    let newResource = null;
+    for( let file of files ) {
+      onStart({ name: file.name, size: file.file.size });
+      const response = await api.uploadFileToId({ apiOptions, parentId: resource.id, file, onProgress });
+      newResource = normalizeResource(response.body[0]);
+    }
     
     /*const notifications = getNotifications();
     const notification = notifUtils.getNotification(notifications, notificationId);
@@ -100,6 +105,7 @@ async function handler(apiOptions, actions) {
     if (prevResourceId === resource.id) {
       navigateToDir(resource.id, newResource.id, false);
     }
+
   } catch (err) {
     onFailError({
       getNotifications,

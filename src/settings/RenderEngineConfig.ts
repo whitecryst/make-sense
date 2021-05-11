@@ -20,5 +20,5 @@ export class RenderEngineConfig {
         height: 100
     };
     public readonly activeAnchorColor: string = Settings.SECONDARY_COLOR;
-    public readonly inactiveAnchorColor: string = Settings.DARK_THEME_SECOND_COLOR;
+    public readonly inactiveAnchorColor: string = "#fff"; //Settings.DARK_THEME_THIRD_COLOR;
 }

@@ -16,6 +16,10 @@ import { KtkActions } from './logic/actions/KtkActions';
 import { updateImageSeriesContent } from './store/ktk/actionCreators';
 import { store } from '.';
 import { KtkSelector } from './store/selectors/KtkSelector';
+import {
+    BrowserRouter as Router,
+    Route
+} from "react-router-dom";
 
 interface IProps {
     projectType: ProjectType;
@@ -52,12 +56,18 @@ const App: React.FC<IProps> = ({projectType, windowSize, ObjectDetectorLoaded, P
     };
 
       return (
-        <div className={classNames("App", {"AI": ObjectDetectorLoaded || PoseDetectionLoaded})}
-            draggable={false}
-        >
-            {selectRoute()}
-            <PopupView/>
-        </div>
+        <Router
+            basename={"/commandbridge"}
+        >   
+            <Route path="/commandbridge" render={() => <h1>Welcome!</h1>} />
+                <div className={classNames("App", {"AI": ObjectDetectorLoaded || PoseDetectionLoaded})}
+                    draggable={false}
+                >
+                    {selectRoute()}
+                    <PopupView/>
+                </div>
+            
+        </Router>
       );
 };
 

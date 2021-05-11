@@ -17,14 +17,15 @@ import {PopupWindowType} from "../../../../data/enums/PopupWindowType";
 import {updateActivePopupType} from "../../../../store/general/actionCreators";
 import LabelSelect from "./LabelSelector";
 import { readlink } from 'fs/promises';
+import { SymbolsContent } from '../../../../store/ktk/types';
 
 interface IProps {
     size: ISize;
     isActive: boolean;
     isHighlighted: boolean;
     id: string;
-    value: LabelName;
-    options: LabelName[];
+    value: SymbolsContent//LabelName;
+    options: SymbolsContent[];//LabelName[];
     onDelete: (id: string) => any;
     onSelectLabel: (labelRectId: string, labelNameId: string) => any;
     updateHighlightedLabelId: (highlightedLabelId: string) => any;
@@ -158,6 +159,8 @@ class LabelInputField extends React.Component<IProps, IState> {
                 highlightLabel={this.mouseEnterHandler} 
                 imageData={this.props.imageData}
                 onSelectLabel={ this.props.onSelectLabel }
+                labelOptions= {this.props.options }
+                value={this.props.value}
                 //defaultSymbolId={ value ? value.id : "" }
              />
             

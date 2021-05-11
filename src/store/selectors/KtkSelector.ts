@@ -31,13 +31,13 @@ export class KtkSelector {
     public static getImageUrlByFileResource( fileResource ) {
         let ancestors = fileResource.ancestors.map( (r) => (r.name) ).join('/');
         let filePath = ancestors + '/' + fileResource.name;
-        const baseUrl = 'http://mantis-kungfu.berlin/files';
+        const baseUrl = 'https://kungfu-wiki.com/fileserver/images';
         const imgUrl = baseUrl + filePath.replace("Images", "");
         return imgUrl;
     }
     public static getImageSeriesContentByfilePath(fileResource): ImageSeriesContent {
         const imgUrl = this.getImageUrlByFileResource( fileResource )
-        //console.log( "imgUrl: "+imgUrl );
+        console.log( "imgUrl: "+imgUrl );
         let ktkImgCnt = find(store.getState().ktk.imageSeriesContent, {url: imgUrl});
 
         if (ktkImgCnt == null) {
@@ -71,8 +71,8 @@ export class KtkSelector {
               id: actSymbolContent.symbolId};
             labelNames.push( actLabelName );
         }
-        console.log( "labelNamesFromSymbols:" );
-        console.log( labelNames )
+        //console.log( "labelNamesFromSymbols:" );
+        //console.log( labelNames )
         return labelNames;
     }
 

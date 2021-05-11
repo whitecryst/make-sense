@@ -1,0 +1,31 @@
+[
+    {
+        "id": "1",
+        "title": "Name xy",
+        "sub_title": "Solaranlage",
+        "arc__bezug": 0.72,
+        "arc__einspeisung": 0.28,
+        "detail__anlage": "Gebaut in 1990",
+        "stat1": 453.02,
+        "stat2": 231.3,
+        "edges": [
+            {
+                "target_id": "2",
+                "stat1": 123,
+                "stat2": 456,
+                "detail__edge": "Aktuelle Bauarbeiten"
+            }
+        ]
+    },
+    {
+        "id": "2",
+        "title": "Name ab",
+        "sub_title": "Netzpunkt",
+        "arc__bezug": 0.3,
+        "arc__einspeisung": 0.7,
+        "detail__anlage": "Letzter Ausfall: 03.02.2018",
+        "stat1": 153.02,
+        "stat2": 421.3,
+        "edges": []
+    }
+]

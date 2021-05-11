@@ -81,14 +81,14 @@ const EditorContainer: React.FC<IProps> = (
         return <>
            <VerticalEditorButton
                 label="Folders"
-                image={"/ico/files.png"}
+                image={"ico/files.png"}
                 imageAlt={"folders"}
                 onClick={leftSideBarFoldersButtonOnClick}
                 isActive={leftTabStatusFolders}
             />
             <VerticalEditorButton
                 label="Images"
-                image={"/ico/camera.png"}
+                image={"ico/camera.png"}
                 imageAlt={"images"}
                 onClick={leftSideBarImageButtonOnClick}
                 isActive={leftTabStatusImages}
@@ -104,7 +104,7 @@ const EditorContainer: React.FC<IProps> = (
     const leftSideBarRenderFolders = () => {
         const apiOptions = {
           ...connectorNodeV1.apiOptions,
-          apiRoot: `http://localhost:3001` // Or you local Server Node V1 installation.
+          apiRoot: `https://kungfu-wiki.com:3001` // Or you local Server Node V1 installation.
         }
         
         const fileManager = (
@@ -137,7 +137,7 @@ const EditorContainer: React.FC<IProps> = (
         return <>
             <VerticalEditorButton
                 label="Labels"
-                image={"/ico/tags.png"}
+                image={"ico/tags.png"}
                 imageAlt={"labels"}
                 onClick={rightSideBarButtonOnClick}
                 isActive={rightTabStatus}
