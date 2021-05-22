@@ -4,7 +4,7 @@ import {LabelType} from "../../data/enums/LabelType";
 import {IPoint} from "../../interfaces/IPoint";
 import {LabelStatus} from "../../data/enums/LabelStatus";
 import {ILine} from "../../interfaces/ILine";
-import { ImageSeriesContent } from "../ktk/types";
+import { ImageSeriesContent, SymbolsContent } from "../ktk/types";
 
 export type LabelRect = {
     // GENERAL
@@ -16,6 +16,18 @@ export type LabelRect = {
     isCreatedByAI: boolean;
     status: LabelStatus;
     suggestedLabel: string;
+
+    //Ktk
+    side: Side; 
+    symbol: SymbolsContent;
+}
+
+export enum Side {
+    LEFT = "Left",
+    RIGHT = "Right",
+    NONE = "None",
+    UNKNOWN = "Unknown",
+    UNAMBIGIOUS = "Unambigious"
 }
 
 export type LabelPoint = {
@@ -28,6 +40,10 @@ export type LabelPoint = {
     isCreatedByAI: boolean;
     status: LabelStatus;
     suggestedLabel: string;
+
+    //KtK
+    side: Side; 
+    symbol: SymbolsContent;
 }
 
 export type LabelPolygon = {
@@ -42,10 +58,19 @@ export type LabelLine = {
     line: ILine
 }
 
-export type LabelName = {
+/*export type LabelName = {
     name: string;
     id: string;
-}
+}*/
+
+export type LabelName = {
+    id: string;
+    category: string;
+    name: string;
+    fullname: string
+    imgUrl: string;
+    description: string;
+} 
 
 export type ImageData = {
     id: string;

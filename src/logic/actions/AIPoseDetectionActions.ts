@@ -1,6 +1,6 @@
 import {PoseDetector} from "../../ai/PoseDetector";
 import {Keypoint, Pose} from "@tensorflow-models/posenet";
-import {ImageData, LabelName, LabelPoint} from "../../store/labels/types";
+import {ImageData, LabelName, LabelPoint, Side} from "../../store/labels/types";
 import {LabelsSelector} from "../../store/selectors/LabelsSelector";
 import {ImageRepository} from "../imageRepository/ImageRepository";
 import {LabelStatus} from "../../data/enums/LabelStatus";
@@ -14,6 +14,7 @@ import {updateSuggestedLabelList} from "../../store/ai/actionCreators";
 import {updateActivePopupType} from "../../store/general/actionCreators";
 import {PopupWindowType} from "../../data/enums/PopupWindowType";
 import {NumberUtil} from "../../utils/NumberUtil";
+import { KtkSelector } from "../../store/selectors/KtkSelector";
 
 export class AIPoseDetectionActions {
     public static detectPoseForActiveImage(): void {
@@ -27,7 +28,7 @@ export class AIPoseDetectionActions {
 
         store.dispatch(updateActivePopupType(PopupWindowType.LOADER));
         PoseDetector.predict(image, (poses: Pose[]) => {
-            const suggestedLabelNames = AIPoseDetectionActions.extractNewSuggestedLabelNames(LabelsSelector.getLabelNames(), poses);
+            const suggestedLabelNames = AIPoseDetectionActions.extractNewSuggestedLabelNames(KtkSelector.getSymbolsContent()/*LabelsSelector.getLabelNames()*/, poses);
             const rejectedLabelNames = AISelector.getRejectedSuggestedLabelList();
             const newlySuggestedNames = AIActions.excludeRejectedLabelNames(suggestedLabelNames, rejectedLabelNames);
             if (newlySuggestedNames.length > 0) {
@@ -69,7 +70,9 @@ export class AIPoseDetectionActions {
                             },
                             isCreatedByAI: true,
                             status: LabelStatus.UNDECIDED,
-                            suggestedLabel: keypoint.part
+                            suggestedLabel: keypoint.part,
+                            symbol: null,
+                            side: null
                         }
                     })
             })
@@ -97,11 +100,13 @@ export class AIPoseDetectionActions {
         const newImageData: ImageData = {
             ...imageData,
             labelPoints: imageData.labelPoints.map((labelPoint: LabelPoint) => {
-                const labelName: LabelName = findLast(LabelsSelector.getLabelNames(), {name: labelPoint.suggestedLabel});
+                const labelName: LabelName = findLast(KtkSelector.getSymbolsContent() /*LabelsSelector.getLabelNames()*/, {name: labelPoint.suggestedLabel});
                 return {
                     ...labelPoint,
                     status: LabelStatus.ACCEPTED,
-                    labelId: !!labelName ? labelName.id : labelPoint.labelId
+                    labelId: !!labelName ? labelName.id : labelPoint.labelId,
+                    symbol: labelName,
+                    side : labelName.name.includes("left") ? Side.LEFT : (labelName.name.includes("right") ? Side.RIGHT : Side.NONE)
                 }
             })
         };

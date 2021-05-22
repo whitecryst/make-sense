@@ -37,7 +37,7 @@ export class KtkSelector {
     }
     public static getImageSeriesContentByfilePath(fileResource): ImageSeriesContent {
         const imgUrl = this.getImageUrlByFileResource( fileResource )
-        console.log( "imgUrl: "+imgUrl );
+        //console.log( "imgUrl: "+imgUrl );
         let ktkImgCnt = find(store.getState().ktk.imageSeriesContent, {url: imgUrl});
 
         if (ktkImgCnt == null) {
@@ -47,7 +47,8 @@ export class KtkSelector {
                 imageId: "0",
                 url: imgUrl,
                 imageMap: "",
-                symbolIds: "",
+                //symbolIds: "",
+                posture:null
             }; 
             store.dispatch( addImageSeriesContentRow(  newCnt ) );
             ktkImgCnt = newCnt;
@@ -68,7 +69,7 @@ export class KtkSelector {
         let labelNames = [];
         for( let actSymbolContent of store.getState().ktk.symbolsContent ) {
             let actLabelName = { name: actSymbolContent.name,
-              id: actSymbolContent.symbolId};
+              id: actSymbolContent.id};
             labelNames.push( actLabelName );
         }
         //console.log( "labelNamesFromSymbols:" );

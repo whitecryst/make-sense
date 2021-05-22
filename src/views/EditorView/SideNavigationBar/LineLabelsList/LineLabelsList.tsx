@@ -14,6 +14,7 @@ import {
 } from "../../../../store/labels/actionCreators";
 import {AppState} from "../../../../store";
 import {connect} from "react-redux";
+import { SymbolsContent } from '../../../../store/ktk/types';
 
 interface IProps {
     size: ISize;
@@ -22,7 +23,7 @@ interface IProps {
     activeLabelId: string;
     highlightedLabelId: string;
     updateActiveLabelNameId: (activeLabelId: string) => any;
-    labelNames: LabelName[];
+    labelNames: LabelName[]//LabelName[];
     updateActiveLabelId: (activeLabelId: string) => any;
 }
 

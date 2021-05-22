@@ -29,15 +29,17 @@ interface IProps {
 }
 
 const App: React.FC<IProps> = ({projectType, windowSize, ObjectDetectorLoaded, PoseDetectionLoaded}) => {
-    if( KtkSelector.getImageSeriesMetaSize() == 0 ) {
-        KtkActions.loadImageSeriesMeta();
-    }
-    if( KtkSelector.getImageSeriesContentSize() == 0 ) {
-        KtkActions.loadImageSeriesContent();
-    }
     if( KtkSelector.getSymbolsContentSize() == 0 ) {
-        KtkActions.LoadSymbolsContent();
+        KtkActions.LoadSymbolsContent().then( () => {
+            if( KtkSelector.getImageSeriesMetaSize() == 0 ) {
+                KtkActions.loadImageSeriesMeta();
+            }
+            if( KtkSelector.getImageSeriesContentSize() == 0 ) {
+                KtkActions.loadImageSeriesContent();
+            }
+        });
     }
+    
     
     
 

@@ -19,12 +19,26 @@ export type ImageSeriesContent = {
     imageId: string;
     url: string;
     imageMap: string;
-    symbolIds: string;
+    //symbolIds: string;
+    posture: PostureContent; 
 } 
 
+ export type PostureContent = {
+     leftHand: SymbolsContent;
+     leftArm: SymbolsContent;
+     rightHand: SymbolsContent;
+     rightArm: SymbolsContent;
+     body: SymbolsContent;
+     leftFoot: SymbolsContent;
+     leftLeg: SymbolsContent;
+     rightFoot: SymbolsContent;
+     rightLeg: SymbolsContent;
+     postureHash: String;
+     postureContentArr: SymbolsContent[];
+ }
 
 export type SymbolsContent = {
-    symbolId: string;
+    id: string;
     category: string;
     name: string;
     fullname: string

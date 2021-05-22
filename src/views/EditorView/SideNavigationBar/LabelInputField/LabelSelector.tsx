@@ -9,7 +9,7 @@ import { KtkActions } from '../../../../logic/actions/KtkActions';
 import { Settings } from '../../../../settings/Settings';
 import {ImageButton} from "../../../Common/ImageButton/ImageButton";
 import {ImageSeriesMeta, ImageSeriesContent, SymbolsContent} from "../../../../store/ktk/types";
-import {ImageData, LabelName, LabelRect} from "../../../../store/labels/types";
+import {ImageData, LabelName, LabelRect, Side} from "../../../../store/labels/types";
 import {IRect} from "../../../../interfaces/IRect";
 import TextInput from '../../../Common/TextInput/TextInput';
 import { TextareaAutosize } from '@material-ui/core';
@@ -19,6 +19,8 @@ import {addImageSeriesContentRow, addSymbolsContentRow} from "../../../../store/
 import connectorNodeV1 from '../../../../filemanager/server-connector/';
 import api from '../../../../filemanager/server-connector/api';
 import apiOptions from '../../../../filemanager/server-connector/apiOptions';
+import { LabelsSelector } from '../../../../store/selectors/LabelsSelector';
+import {LabelType} from '../../../../../src/data/enums/LabelType';
 
 interface IProps {
   labelRectId: string;
@@ -26,17 +28,17 @@ interface IProps {
 //    onSelectLabel: (labelRectId: string, labelNameId: string) => any;
   highlightLabel: (highlightedLabelId: string) => any;
   imageData: ImageData;
-  onSelectLabel: (labelRectId: string, symbolId: string) => any;
+  onSelectLabel: (labelRectId: string, symbolId: string, symbol:SymbolsContent) => any;
   //defaultSymbolId:string;
-  labelOptions: SymbolsContent[];
-  value: SymbolsContent;
+  //labelOptions: LabelName[];
+  value: LabelName;
 }
   
 interface IState {
   showInfo: boolean;
   showMoreAction: boolean;
   addSymbolInUse: boolean;
-  actSymbol: SymbolsContent;
+  actSymbol: LabelName;
   actCategory: string;
   addSymbolValue_Category;
   addSymbolValue_Name;
@@ -82,7 +84,9 @@ class LabelSelect extends Component<IProps, IState>  {
   private updateSelect = (i:SymbolsContent) => {
     this.setState( { actSymbol: i} );
     // give selected symbol id up to parent
-    this.props.onSelectLabel( this.props.labelRectId, i.symbolId );
+    //define side
+    console.log("update symbol in labelRect:"+i);
+    this.props.onSelectLabel( this.props.labelRectId, i.id , i);
   }
 
   private updateSelectCategory = (i:string) => {
@@ -98,7 +102,7 @@ class LabelSelect extends Component<IProps, IState>  {
     setTimeout( () => {this.setState( {showMoreAction: false} )}, 750);
   }
 
-  private checkSymbolCategory = (i:SymbolsContent) => {
+  private checkSymbolCategory = (i:LabelName) => {
     if( this.state.actCategory != null && this.state.actCategory != '' ) {
       return i.category == this.state.actCategory;
     } else {
@@ -138,7 +142,7 @@ class LabelSelect extends Component<IProps, IState>  {
     // create new Symbol object
     //const newSymbolId = Math.max.apply(Math, symbols.map(function(s) { return Number(s.symbolId); })) + 1;
     let newSymbol:SymbolsContent = {
-      symbolId: String(0),
+      id: String(0),
       category:this.state.addSymbolValue_Category,
       name:this.state.addSymbolValue_Name,
       fullname:this.state.addSymbolValue_Category+"/"+this.state.addSymbolValue_Name,
@@ -147,9 +151,9 @@ class LabelSelect extends Component<IProps, IState>  {
     };
 
     // upload new Symbol to GoogleSheets (will add the symbolId)
-    newSymbol.symbolId = await KtkActions.addSymbolsContentRow( newSymbol );
+    newSymbol.id = await KtkActions.addSymbolsContentRow( newSymbol );
 
-    newSymbol.imgUrl = 'https://kungfu-wiki.com/fileserver/images/Symbols/'+newSymbol.symbolId+'.png';
+    newSymbol.imgUrl = 'https://kungfu-wiki.com/fileserver/images/Symbols/'+newSymbol.id+'.png';
     // add new symbol to redux store
     store.dispatch( addSymbolsContentRow(newSymbol) );
     console.log( "added new KtK Symbol to redux store" );
@@ -163,7 +167,7 @@ class LabelSelect extends Component<IProps, IState>  {
     const api = connectorNodeV1.api;
     const symbolsFolderId:any = await api.getIdForPath(apiOptions, '/Symbols')
     let imgFile = this.state.addSymbolImgBlob;
-    imgFile.name = newSymbol.symbolId+".png";
+    imgFile.name = newSymbol.id+".png";
     imgFile.lastModifiedDate = new Date();
     let uploadObj = {type:'image/png', name:imgFile.name, file:imgFile};
     console.log( "now uploading: "+imgFile.name+"..." )
@@ -177,10 +181,10 @@ class LabelSelect extends Component<IProps, IState>  {
     // now add uploaded symbol image to imageSeriesContent
     let newSymbolImageContent : ImageSeriesContent = {
       seriesId: "43",
-      imageId: String( newSymbol.symbolId ),
+      imageId: String( newSymbol.id ),
       url: newSymbol.imgUrl,
       imageMap:'',
-      symbolIds:''
+      posture:null,
     }
     KtkActions.addImageSeriesContentRow( newSymbolImageContent );  
 
@@ -224,13 +228,17 @@ class LabelSelect extends Component<IProps, IState>  {
   }
 
   public render() {
-      
-    let symbols = this.props.labelOptions ? this.props.labelOptions : KtkSelector.getSymbolsContent() ;
-    console.log( symbols );
+//    let symbols = [];
+//    if( this.props.labelOptions != null && this.props.labelOptions.length > 0 ) {
+//      symbols = this.props.labelOptions;
+//    }  else {
+      let symbols = KtkSelector.getSymbolsContent() ;
+//    }
+
+    //console.log( symbols );
     let categories = Array.from(new Set(symbols.map(symbol => symbol.category)));
     let categoriesWithoutLeftRight = Array.from(new Set(symbols.map(symbol => symbol.category.replace("Left ","").replace("Right ",""))));
-    //console.log( "render" );
-    //console.log(symbols);
+
     let ListItem = ( i:any ) => {
       let symbol:SymbolsContent = i.item;
       return (<div className="grid-container" style={{display:"inline-grid", width:'100%', margin:'none',gridTemplateColumns: 'auto auto'}}>
@@ -238,7 +246,7 @@ class LabelSelect extends Component<IProps, IState>  {
           <img height={"30"} src={String(symbol.imgUrl)}></img>
         </div>
         <div style={{ gridColumn: '2 / 2' , gridRow: 1, lineHeight:'1'}}>  
-          {symbol.name}<strong>{" ("+symbol.symbolId+")"}</strong>
+          {symbol.name}<strong>{" ("+symbol.id+")"}</strong>
         </div>
       </div>);
     };
@@ -246,25 +254,48 @@ class LabelSelect extends Component<IProps, IState>  {
       let GroupHeading = ({ item }) => (
         <span style={{border: "1px", color: "#555", fontSize: "medium"}}>{'--- ' + item + ' ---'}</span>
       );
-      //const { value , onChange } = this.props;
 
       // on first start, load value according to already set Rectlabel content
-      
       let noImageSeriesAssigned = this.props.imageData ? this.props.imageData.ktk_imageSeriesContent.seriesId == "0" : true;
-
-      if( this.state.actSymbol == null && this.props.imageData.labelRects) {
-        for( let actLabelRect of this.props.imageData.labelRects ) {
-          if( actLabelRect.id == this.props.labelRectId ) {
-            
+      
+      // TODO use value unstead of this crap below
+      let labelData = null;
+      switch(LabelsSelector.getActiveLabelType()) {
+        case LabelType.LINE: 
+          labelData = this.props.imageData.labelLines;
+        break;
+        case LabelType.POINT: 
+          labelData = this.props.imageData.labelPoints;
+        break;
+        case LabelType.POLYGON: 
+          labelData = this.props.imageData.labelPolygons;
+        break;
+        case LabelType.RECT: 
+          labelData = this.props.imageData.labelRects;
+        break;
+        
+      }
+      let side:Side = Side.UNKNOWN;
+      // get initial value from ktk googlesheet (saved value)
+    
+      for( let actLabelRect of labelData ) {
+        if( actLabelRect.id == this.props.labelRectId ) {
+          side = actLabelRect.side;
+          if( this.state.actSymbol == null && this.props.value == null && labelData) {      
             // now find this symbol id in symbols
-            let defaultSymbol = symbols.find(s => s.symbolId == actLabelRect.labelId);
+            let defaultSymbol = symbols.find(s => s.id == actLabelRect.labelId);
             if( defaultSymbol != null ) {
               this.setState({ actSymbol: defaultSymbol });
               this.setState({ actCategory: defaultSymbol.category });
             }
+            
+          } else if( this.state.actSymbol == null && this.props.value != null) {
+            //get initial value from parent (e.g. from pose detection)
+            this.setState( { actSymbol: this.props.value} );
+            console.log( "got value from props" )
           }
         }
-      }
+      } 
     return ( 
 <div>
 { noImageSeriesAssigned && <div style={{color:'red', width:'100%'}} >! Image has no Imageseries ID !<br/>Assign imageseries in filemanager!</div> }
@@ -284,7 +315,7 @@ class LabelSelect extends Component<IProps, IState>  {
           filter='contains'
           textField = 'name'
           valueField = 'name'
-          onSelect={this.updateSelectCategory}
+          onChange={this.updateSelectCategory}
       />
     </div>
     <div style={{ gridColumn: '2 / 3' , gridRow: 1}}>
@@ -301,7 +332,7 @@ class LabelSelect extends Component<IProps, IState>  {
         itemComponent={ListItem}
         groupComponent={GroupHeading}
         groupBy={symbol => symbol.category}
-        onSelect={this.updateSelect}
+        onChange={this.updateSelect}
       />
     </div>
 
@@ -339,7 +370,8 @@ class LabelSelect extends Component<IProps, IState>  {
   {/*info field for a label*/}
   { this.state.showInfo && <div className="LabelSelectorInfo" style={{position:'relative'}}/*style={{position:'relative', zIndex:200}}*/>
     <div className={'oc-fm--dialog__input-label'} style={{fontWeight:'normal', color:'#ddd'}}><strong>{"Category: "}</strong>{ (this.state.actSymbol ? this.state.actSymbol.category : "")}</div>
-    <div className={'oc-fm--dialog__input-label'} style={{fontWeight:'normal', color:'#ddd'}}><strong>{"Symbol: "+  (this.state.actSymbol ? "("+this.state.actSymbol.symbolId +")" : "")}{":"}
+    <div className={'oc-fm--dialog__input-label'} style={{fontWeight:'normal', color:'#ddd'}}><strong>{"Side: "}</strong>{ (side ? side : "")}</div>
+    <div className={'oc-fm--dialog__input-label'} style={{fontWeight:'normal', color:'#ddd'}}><strong>{"Symbol: "+  (this.state.actSymbol ? "("+this.state.actSymbol.id +")" : "")}{":"}
       </strong>{ this.state.actSymbol ? this.state.actSymbol.fullname : ""}</div> 
     <div className={'oc-fm--dialog__input-label'} style={{fontWeight:'normal', color:'#ddd'}}><strong>{"Info: "}</strong>{ this.state.actSymbol ? this.state.actSymbol.description: ""}</div>
     <div className={'oc-fm--dialog__input-label'} style={{fontWeight:'normal', color:'#ddd'}}><strong>{"Image: "}</strong>

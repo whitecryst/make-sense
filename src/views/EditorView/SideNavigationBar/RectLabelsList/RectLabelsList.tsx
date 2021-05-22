@@ -1,7 +1,7 @@
 import React from 'react';
 import {ISize} from "../../../../interfaces/ISize";
 import Scrollbars from 'react-custom-scrollbars';
-import {ImageData, LabelName, LabelRect} from "../../../../store/labels/types";
+import {ImageData, LabelName, LabelRect, Side} from "../../../../store/labels/types";
 import './RectLabelsList.scss';
 import {
     updateActiveLabelId,
@@ -16,11 +16,9 @@ import EmptyLabelList from "../EmptyLabelList/EmptyLabelList";
 import {LabelActions} from "../../../../logic/actions/LabelActions";
 import {LabelStatus} from "../../../../data/enums/LabelStatus";
 import {findLast} from "lodash";
-import { v4 as uuidv4 } from 'uuid';
-import {TextButton} from "../../../Common/TextButton/TextButton";
-import { LabelUtil } from "../../../../utils/LabelUtil";
 import { KtkActions } from '../../../../logic/actions/KtkActions';
 import { SymbolsContent } from '../../../../store/ktk/types';
+import {RectUtil} from '../../../../utils/RectUtil';
 
 interface IProps {
     size: ISize;
@@ -29,7 +27,7 @@ interface IProps {
     activeLabelId: string;
     highlightedLabelId: string;
     updateActiveLabelNameId: (activeLabelId: string) => any;
-    labelNames: SymbolsContent[];
+    labelNames: LabelName[];
     updateActiveLabelId: (activeLabelId: string) => any;
 }
 
@@ -51,16 +49,20 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
         KtkActions.udateImageAnnotation( imageData );
     };
 
-    const updateRectLabel = (labelRectId: string, labelNameId: string) => {
+    const updateRectLabel = (labelRectId: string, labelNameId: string, symbol: SymbolsContent) => {
+
         const newImageData = {
             ...imageData,
             labelRects: imageData.labelRects
                 .map((labelRect: LabelRect) => {
                 if (labelRect.id === labelRectId) {
+                    
                     return {
                         ...labelRect,
                         labelId: labelNameId,
-                        status: LabelStatus.ACCEPTED
+                        status: LabelStatus.ACCEPTED,
+                        symbol: symbol,
+                        side: KtkActions.getRectLabelSideFromPoints( labelRect, imageData.labelPoints )
                     }
                 } else {
                     return labelRect
@@ -71,7 +73,9 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
         updateActiveLabelNameId(labelNameId);
 
         // upload data to google sheets
-        KtkActions.udateImageAnnotation( imageData );
+        if(labelRectId && labelNameId && symbol != null) {
+            KtkActions.udateImageAnnotation( newImageData );
+        }
 
     };
 

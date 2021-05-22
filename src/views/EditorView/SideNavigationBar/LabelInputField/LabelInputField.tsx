@@ -11,7 +11,7 @@ import {connect} from "react-redux";
 import {updateActiveLabelId, updateHighlightedLabelId} from "../../../../store/labels/actionCreators";
 import Scrollbars from 'react-custom-scrollbars';
 import {EventType} from "../../../../data/enums/EventType";
-import {ImageData, LabelName, LabelRect} from "../../../../store/labels/types";
+import {ImageData, LabelName, LabelRect, Side} from "../../../../store/labels/types";
 import {LabelsSelector} from "../../../../store/selectors/LabelsSelector";
 import {PopupWindowType} from "../../../../data/enums/PopupWindowType";
 import {updateActivePopupType} from "../../../../store/general/actionCreators";
@@ -24,10 +24,10 @@ interface IProps {
     isActive: boolean;
     isHighlighted: boolean;
     id: string;
-    value: SymbolsContent//LabelName;
-    options: SymbolsContent[];//LabelName[];
+    value: LabelName;
+    options: LabelName[];
     onDelete: (id: string) => any;
-    onSelectLabel: (labelRectId: string, labelNameId: string) => any;
+    onSelectLabel: (labelRectId: string, labelNameId: string, symbol:SymbolsContent) => any;
     updateHighlightedLabelId: (highlightedLabelId: string) => any;
     updateActiveLabelId: (highlightedLabelId: string) => any;
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
@@ -159,7 +159,7 @@ class LabelInputField extends React.Component<IProps, IState> {
                 highlightLabel={this.mouseEnterHandler} 
                 imageData={this.props.imageData}
                 onSelectLabel={ this.props.onSelectLabel }
-                labelOptions= {this.props.options }
+                //labelOptions= {this.props.options }
                 value={this.props.value}
                 //defaultSymbolId={ value ? value.id : "" }
              />

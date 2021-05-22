@@ -1,4 +1,4 @@
-import {LabelName, LabelPolygon, LabelRect} from "../store/labels/types";
+import {LabelName, LabelPolygon, LabelRect, LabelPoint} from "../store/labels/types";
 import { v4 as uuidv4 } from 'uuid';
 import {find} from "lodash";
 import {IRect} from "../interfaces/IRect";
@@ -9,7 +9,11 @@ export class LabelUtil {
     public static createLabelName(name: string): LabelName {
         return {
             id: uuidv4(),
-            name: name
+            name: name,
+            category: "",    
+            fullname: "",
+            imgUrl: "",
+            description: ""
         }
     }
 
@@ -20,7 +24,22 @@ export class LabelUtil {
             rect,
             isCreatedByAI: false,
             status: LabelStatus.ACCEPTED,
-            suggestedLabel: null
+            suggestedLabel: null,
+            side : null,
+            symbol: null
+        }
+    }
+
+    public static createLabelPoint(labelId: string, point: IPoint): LabelPoint {
+        return {
+            id: uuidv4(),
+            labelId: labelId,
+            point,
+            isCreatedByAI: false,
+            status: LabelStatus.ACCEPTED,
+            suggestedLabel: null,
+            side : null,
+            symbol: null
         }
     }
 
@@ -45,7 +64,11 @@ export class LabelUtil {
             if (!!object[key]) {
                 labelNamesList.push({
                     id: key,
-                    name: object[key]
+                    name: object[key],
+                    category: "",    
+                    fullname: "",
+                    imgUrl: "",
+                    description: ""
                 })
             }
         });

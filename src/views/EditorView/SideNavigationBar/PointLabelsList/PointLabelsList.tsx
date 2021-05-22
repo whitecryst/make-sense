@@ -15,6 +15,7 @@ import EmptyLabelList from "../EmptyLabelList/EmptyLabelList";
 import {LabelActions} from "../../../../logic/actions/LabelActions";
 import {findLast} from "lodash";
 import {LabelStatus} from "../../../../data/enums/LabelStatus";
+import { KtkActions } from '../../../../logic/actions/KtkActions';
 
 interface IProps {
     size: ISize;
@@ -23,7 +24,7 @@ interface IProps {
     activeLabelId: string;
     highlightedLabelId: string;
     updateActiveLabelNameId: (activeLabelId: string) => any;
-    labelNames: LabelName[];
+    labelNames: LabelName[]//LabelName[];
     updateActiveLabelId: (activeLabelId: string) => any;
 }
 
@@ -68,6 +69,9 @@ const PointLabelsList: React.FC<IProps> = (
         };
         updateImageDataById(imageData.id, newImageData);
         updateActiveLabelNameId(labelNameId);
+
+        // upload data to google sheets
+        KtkActions.udateImageAnnotation( imageData );
     };
 
     const onClickHandler = () => {

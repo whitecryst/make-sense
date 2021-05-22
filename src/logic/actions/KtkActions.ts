@@ -3,16 +3,58 @@ import {store} from "../../index";
 import {updateImageSeriesMeta, updateImageSeriesContent, updateImageSeriesContentRow, updateSymbolsContent, addSymbolsContentRow} from "../../store/ktk/actionCreators";
 import {ViewPortActions} from "./ViewPortActions";
 import {EditorModel} from "../../staticModels/EditorModel";
-import { ImageSeriesMeta, ImageSeriesContent, SymbolsContent } from "../../store/ktk/types";
+import { ImageSeriesMeta, ImageSeriesContent, SymbolsContent, PostureContent } from "../../store/ktk/types";
 import { KtkSelector } from "../../store/selectors/KtkSelector";
 import { COCOAnnotationsLoadingError } from "../import/coco/COCOErrors";
-import {ImageData, LabelName, LabelRect} from "../../store/labels/types";
+import {ImageData, LabelName, LabelRect, LabelPoint, Side} from "../../store/labels/types";
 import { toInteger } from "lodash";
 import { convertCompilerOptionsFromJson } from "typescript";
+import {RectUtil} from "../../utils/RectUtil";
 
 export class KtkActions {
 
-    
+    public static getRectLabelSideFromPoints(labelRect:LabelRect, labelPoints:LabelPoint[] ):Side {
+        // get side
+        let side = Side.UNKNOWN;
+        let isLeft = false;
+        let isRight = false;
+        for( let actPointLabel of labelPoints ) {
+            if( RectUtil.isPointInside(labelRect.rect, actPointLabel.point ) ) {
+                
+                if( actPointLabel.side == Side.LEFT) {
+                    isLeft = true;
+                } else if( actPointLabel.side == Side.RIGHT) {
+                    isRight = true;
+                }
+            }
+        }
+        if( isLeft && isRight ) {
+            side = Side.UNAMBIGIOUS;
+        } else if( isLeft && !isRight ) {
+            side = Side.LEFT;
+        } else if( !isLeft && isRight) {
+            side = Side.RIGHT;
+        }
+
+        return side;
+    }
+
+    public static getSideFromSymbol(symbol:SymbolsContent): Side {
+        let side:Side = Side.UNKNOWN;
+        if(symbol) {
+            if( symbol.category == "Body part" ) {
+                if( symbol.name.includes("left") ) {
+                    side = Side.LEFT;
+                } else if (symbol.name.includes("right") ) {
+                    side = Side.RIGHT;
+                } else {
+                    side = Side.NONE; 
+                }
+            }
+        }
+        
+        return side;
+    }
 
     public static async loadImageSeriesMeta(): Promise<any> {
         
@@ -64,6 +106,41 @@ export class KtkActions {
           
     }
 
+    public static parsePostureContentString( toParse:string): PostureContent {
+        if( toParse == null || toParse == "") {
+            return null;
+        }
+        // get id of symbols in correct order (left hand, left arm, right hand, right arm, body left foot, left leg, right foot, right leg)
+        const symbolIdsArr:string[] = toParse.replaceAll("#",",").replaceAll("|",",").replaceAll("_","").split(",");
+        
+        if( symbolIdsArr.length != 9) {
+            console.log("unable to parse postureHash: "+toParse);
+            return null;
+        }
+        const symbolsContentArr:SymbolsContent[] = [];
+        for( const actId of symbolIdsArr ) {
+            //console.log("search for symbolId:"+actId);
+            //console.log(  KtkSelector.getSymbolsContent() );
+            //console.log( KtkSelector.getSymbolsContent().find( s => s.id == actId ) );
+            symbolsContentArr.push( KtkSelector.getSymbolsContent().find( s => s.id == actId ) );
+        }
+        
+        let result:PostureContent = {
+            leftHand: symbolsContentArr[0],
+            leftArm: symbolsContentArr[1],
+            rightHand: symbolsContentArr[2],
+            rightArm: symbolsContentArr[3],
+            body: symbolsContentArr[4],
+            leftFoot: symbolsContentArr[5],
+            leftLeg: symbolsContentArr[6],
+            rightFoot: symbolsContentArr[7],
+            rightLeg: symbolsContentArr[8],
+            postureHash: toParse,
+            postureContentArr: symbolsContentArr
+        }
+        return result;
+        
+    }
     public static async loadImageSeriesContent(): Promise<any> {
         
         // get ktk imageSeriesId  from google sheets
@@ -90,21 +167,19 @@ export class KtkActions {
             let actImageId = sheet.getCell(i, 1).value;
             let actImageUrl = sheet.getCell(i, 2).value; 
             let actImageMap = sheet.getCell(i, 4).value; 
-            let actSymbolIds = sheet.getCell(i, 5).value;     
+            let actSymbolIds = sheet.getCell(i, 5).value;
+            let actPostureContentString = sheet.getCell(i, 6).value;
+            let actPostureContent = this.parsePostureContentString( actPostureContentString );
             let actContent:ImageSeriesContent = {
                 seriesId: seriesId,
                 imageId: actImageId,
                 url: actImageUrl,
                 imageMap: actImageMap,
-                symbolIds: actSymbolIds
+                //symbolIds: actSymbolIds
+                posture: actPostureContent
             }; 
-            //console.log( "download image: "+imageUrl ); 
-            //console.log(actImageUrl);
-            //resource.ktk_id = actImageId;
             content.push(actContent);
         }
-        //console.log("content:");
-        //console.log(content);
         store.dispatch( updateImageSeriesContent(content) );
         console.log( "KtK ImageSeriesContent updated" );  
           
@@ -129,7 +204,7 @@ export class KtkActions {
         const sheet = doc.sheetsByTitle['ImageSeriesContent']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
         const numrows = sheet.rowCount;
         console.log(sheet.title);
-        await sheet.loadCells('A1:G'+numrows);
+        await sheet.loadCells('A1:H'+numrows);
         
         //find rowNr to insert image content
         let existingRowNr = null;
@@ -153,55 +228,79 @@ export class KtkActions {
         if( existingRowNr != null ) {
             // create image Map
 
-            let imageMap:String = imageData.labelRects.map( r => "rect "+toInteger(r.rect.x)+" "+toInteger(r.rect.y)+" "+toInteger(r.rect.x+r.rect.width)+" "+toInteger(r.rect.y+r.rect.height)+" [["+r.labelId+"]]" ).join("\n");
-
+            let imageMap:String = "";
+            imageMap += imageData.labelPoints.map( p => "circle "+toInteger(p.point.x)+" "+toInteger(p.point.y)+" 20 [["+p.symbol.fullname+"]]" ).join("\n") + "\n";
+            imageMap += imageData.labelRects.map( r => "rect "+toInteger(r.rect.x)+" "+toInteger(r.rect.y)+" "+toInteger(r.rect.x+r.rect.width)+" "+toInteger(r.rect.y+r.rect.height)+" [["+r.symbol.fullname+"]]" ).join("\n");
+            
             //create List of symbolIds
             let symbolIdsArr:String[] = imageData.labelRects.map(r => r.labelId);
             let symbolIds:String = symbolIdsArr.join(",");
 
             console.log( symbolIdsArr );
+            console.log( imageData.labelRects );
             
             // create hash of symbol ids to identify techniques
             const symbols = KtkSelector.getSymbolsContent() ;
-            const leftHandSymbol = symbols.find( s => s.category.includes( "Left Hand posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
-            const rightHandSymbol = symbols.find( s => s.category.includes( "Right Hand posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
-            const leftArmSymbol = symbols.find( s => s.category.includes( "Left Arm posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
-            const rightArmSymbol = symbols.find( s => s.category.includes( "Right Arm posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
-            const leftLegSymbol = symbols.find( s => s.category.includes( "Left Leg posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
-            const rightLegSymbol = symbols.find( s => s.category.includes( "Right Leg posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
-            const leftFootSymbol = symbols.find( s => s.category.includes( "Left Foot posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
-            const rightFootSymbol = symbols.find( s => s.category.includes( "Right Foot posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
-            const bodySymbol = symbols.find( s => s.category.includes( "Body posture" ) && symbolIdsArr.find( s2 => s2 == s.symbolId ) );
+            const leftHandSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Hand posture" ) && lr.side == Side.LEFT );
+            const rightHandSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Hand posture" ) && lr.side == Side.RIGHT );
+            const leftArmSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Arm posture" ) && lr.side == Side.LEFT );
+            const rightArmSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Arm posture" ) && lr.side == Side.RIGHT );
+            const leftLegSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Leg posture" ) && lr.side == Side.LEFT );
+            const rightLegSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Leg posture" ) && lr.side == Side.RIGHT );
+            const leftFootSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Foot posture" ) && lr.side == Side.LEFT );
+            const rightFootSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Foot posture" ) && lr.side == Side.RIGHT );
+            const bodySymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Body posture" ) );
             
 
-            const handTechniqueHash:String = (leftHandSymbol != undefined ? leftHandSymbol.symbolId : "_")+ ","
-             +  (leftArmSymbol != undefined ? leftArmSymbol.symbolId : "_") + "|"
-             +  (rightHandSymbol != undefined ? rightHandSymbol.symbolId : "_") + ","
-             +  (rightArmSymbol != undefined ? rightArmSymbol.symbolId : "_") + "|"
-             +  (bodySymbol != undefined ? bodySymbol.symbolId : "_");
+            const handTechniqueHash:String = ""
+             +  (leftHandSymbol != undefined ? leftHandSymbol.labelId : "_")+ ","
+             +  (leftArmSymbol != undefined ? leftArmSymbol.labelId : "_") + "|"
+             +  (rightHandSymbol != undefined ? rightHandSymbol.labelId : "_") + ","
+             +  (rightArmSymbol != undefined ? rightArmSymbol.labelId : "_") + "|"
+             +  (bodySymbol != undefined ? bodySymbol.labelId : "_");
+
+             const handTechniqueHashInverse:String = ""
+             +  (rightHandSymbol != undefined ? rightHandSymbol.labelId : "_") + ","
+             +  (rightArmSymbol != undefined ? rightArmSymbol.labelId : "_") + "|"
+             +  (leftHandSymbol != undefined ? leftHandSymbol.labelId : "_")+ ","
+             +  (leftArmSymbol != undefined ? leftArmSymbol.labelId : "_") + "|"
+             +  (bodySymbol != undefined ? bodySymbol.labelId : "_");
 
             const footTechniqueHash:String = ""
-             +  (leftFootSymbol != undefined ? leftFootSymbol.symbolId : "_") + ","
-             +  (leftLegSymbol != undefined ? leftLegSymbol.symbolId : "_") + "|"
-             +  (rightFootSymbol != undefined ? rightFootSymbol.symbolId : "_") + ","
-             +  (rightLegSymbol != undefined ? rightLegSymbol.symbolId : "_");
+             +  (leftFootSymbol != undefined ? leftFootSymbol.labelId : "_") + ","
+             +  (leftLegSymbol != undefined ? leftLegSymbol.labelId : "_") + "|"
+             +  (rightFootSymbol != undefined ? rightFootSymbol.labelId : "_") + ","
+             +  (rightLegSymbol != undefined ? rightLegSymbol.labelId : "_");
+
+             const footTechniqueHashInverse:String = ""
+             +  (rightFootSymbol != undefined ? rightFootSymbol.labelId : "_") + ","
+             +  (rightLegSymbol != undefined ? rightLegSymbol.labelId : "_")+ "|"
+             +  (leftFootSymbol != undefined ? leftFootSymbol.labelId : "_") + ","
+             +  (leftLegSymbol != undefined ? leftLegSymbol.labelId : "_") ;
+             
              
             const kungfuTechniqueHash:String = handTechniqueHash + "#" + footTechniqueHash;
+            const kungfuTechniqueHashInverse:String = handTechniqueHashInverse + "#" + footTechniqueHashInverse;
             console.log( "kungfuTechniqueHash:"+kungfuTechniqueHash );
-            console.log( "existing:"+existingRowNr );
+            console.log( "kungfuTechniqueHashInverse:"+kungfuTechniqueHashInverse );
+            //console.log( "existing:"+existingRowNr );
             let rowToUpdate = existingRowNr;
             let imageMapCell = sheet.getCell(rowToUpdate, 4);
             let symbolIdsCell = sheet.getCell(rowToUpdate, 5);
             let symbolIdsHashCell = sheet.getCell(rowToUpdate, 6);
+            let symbolIdsHashInverseCell = sheet.getCell(rowToUpdate, 7);
 
             // update the cell contents and formatting
             let date = new Date().toLocaleString()
             imageMapCell.value = imageMap;
             symbolIdsCell.value = symbolIds;
             symbolIdsHashCell.value = kungfuTechniqueHash;
-            imageMapCell.note = 'Updated via KtK-Commandbridge at '+ date;
-            symbolIdsCell.note = 'Updated via KtK-Commandbridge at '+ date;
-            symbolIdsHashCell.note = 'Updated via KtK-Commandbridge at '+ date;
+            symbolIdsHashInverseCell.value = kungfuTechniqueHashInverse;
+            const updateNote = 'Updated via KtK-Commandbridge at '+ date;
+            imageMapCell.note = updateNote;
+            symbolIdsCell.note = updateNote;
+            symbolIdsHashCell.note = updateNote;
+            symbolIdsHashInverseCell.note = updateNote;
             await sheet.saveUpdatedCells(); // save all updates in one call
             console.log("...updated sheet!");
         } else {
@@ -415,7 +514,7 @@ export class KtkActions {
                 if( name != null ) {
                     //console.log( "act Label: "+labelName ); 
                     let actContent:SymbolsContent = {
-                        symbolId: symbolId,
+                        id: symbolId,
                         category: category,
                         description: description,
                         name: name,
@@ -423,7 +522,7 @@ export class KtkActions {
                         fullname: fullName,
                     };
                     // a posture symbol is either for left or right (arm, leg). later, this will beremoved when the side is determined by poseNet
-                    if( actContent.category.includes( "posture" ) && !actContent.category.includes( "Body" ) ) {
+                    /*if( actContent.category.includes( "posture" ) && !actContent.category.includes( "Body" ) ) {
                         //create to symbols for left and right
                         let leftContent = Object.assign({}, actContent);
                         let rightContent = Object.assign({}, actContent);
@@ -433,8 +532,9 @@ export class KtkActions {
                         content.push(rightContent);
                     } else {
                         content.push(actContent);
-                    }
-                    
+                    }*/
+
+                    content.push(actContent);
                     labelCount += 1;
                 }
             }
@@ -510,7 +610,7 @@ export class KtkActions {
         await sheet.saveUpdatedCells(); // save all updates in one call
         console.log("...updated sheet!");
         // update imageSeriesContent in redux store
-        symbolsContentRow.symbolId = String(newSymbolId);
+        symbolsContentRow.id = String(newSymbolId);
         
         store.dispatch( addSymbolsContentRow( symbolsContentRow ) );
         console.log("...updated store!");
