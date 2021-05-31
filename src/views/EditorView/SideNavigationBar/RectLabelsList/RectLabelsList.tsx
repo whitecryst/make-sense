@@ -19,6 +19,8 @@ import {findLast} from "lodash";
 import { KtkActions } from '../../../../logic/actions/KtkActions';
 import { SymbolsContent } from '../../../../store/ktk/types';
 import {RectUtil} from '../../../../utils/RectUtil';
+import StateBar from '../../StateBar/StateBar';
+import {LabelsSelector} from "../../../../store/selectors/LabelsSelector";
 
 interface IProps {
     size: ISize;
@@ -29,9 +31,10 @@ interface IProps {
     updateActiveLabelNameId: (activeLabelId: string) => any;
     labelNames: LabelName[];
     updateActiveLabelId: (activeLabelId: string) => any;
+    renderEditorTitle: () => any; 
 }
 
-const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById, labelNames, updateActiveLabelNameId, activeLabelId, highlightedLabelId, updateActiveLabelId}) => {
+const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById, labelNames, updateActiveLabelNameId, activeLabelId, highlightedLabelId, updateActiveLabelId, renderEditorTitle}) => {
     const labelInputFieldHeight = 40;
     const listStyle: React.CSSProperties = {
         width: size.width,
@@ -45,8 +48,7 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
     const deleteRectLabelById = (labelRectId: string) => {
         console.log("onDelete: "+labelRectId);
         LabelActions.deleteRectLabelById(imageData.id, labelRectId);
-        // upload data to google sheets
-        KtkActions.udateImageAnnotation( imageData );
+        updateKtkData( LabelsSelector.getImageDataById(imageData.id) );
     };
 
     const updateRectLabel = (labelRectId: string, labelNameId: string, symbol: SymbolsContent) => {
@@ -56,13 +58,19 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
             labelRects: imageData.labelRects
                 .map((labelRect: LabelRect) => {
                 if (labelRect.id === labelRectId) {
-                    
+                    let side = Side.NONE;
+                    if( symbol.category.includes("Foot posture") ||
+                        symbol.category.includes("Leg posture") || 
+                        symbol.category.includes("Hand posture") ||
+                        symbol.category.includes("Arm posture") ) {
+                            side = KtkActions.getRectLabelSideFromPoints( labelRect, imageData.labelPoints );
+                        }
                     return {
                         ...labelRect,
                         labelId: labelNameId,
                         status: LabelStatus.ACCEPTED,
                         symbol: symbol,
-                        side: KtkActions.getRectLabelSideFromPoints( labelRect, imageData.labelPoints )
+                        side: side
                     }
                 } else {
                     return labelRect
@@ -71,13 +79,38 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
         };
         updateImageDataById(imageData.id, newImageData);
         updateActiveLabelNameId(labelNameId);
-
-        // upload data to google sheets
-        if(labelRectId && labelNameId && symbol != null) {
-            KtkActions.udateImageAnnotation( newImageData );
-        }
+        updateKtkData( newImageData);
 
     };
+
+    const updateKtkData = (newImageData: ImageData ) => {
+        // upload data to google sheets
+        //if(labelRectId && labelNameId && symbol != null) {
+            KtkActions.udateImageAnnotation( newImageData ).then( () => {
+                KtkActions.fetchImageSeriesContentRow( newImageData.ktk_imageSeriesContent ).then( () => { 
+                    updateImageDataById(imageData.id, newImageData);
+                    renderEditorTitle();
+                });
+            }); // reload imageSeriesContent to get the new identifies techniques
+        //}
+    } 
+
+    const setRectSide = (labelRectId: string, side:Side) => {
+         const newImageData = {
+            ...imageData,
+            labelRects: imageData.labelRects
+                .map((labelRect: LabelRect) => {
+                    if (labelRect.id === labelRectId) {
+                        return {
+                            ...labelRect,
+                            side: side
+                        }
+                    } else { return labelRect }
+                })
+         }
+         updateImageDataById(imageData.id, newImageData);
+         updateKtkData(newImageData);
+      }
 
     const onClickHandler = () => {
         updateActiveLabelId(null);
@@ -101,8 +134,9 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
                 options={labelNames}
                 onSelectLabel={updateRectLabel}
                 imageData={imageData}
+                setRectSide={setRectSide}
             />
-        });
+        }) 
     };
 
     

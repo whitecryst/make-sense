@@ -3,8 +3,10 @@ import {Settings} from "./Settings";
 
 export class RenderEngineConfig {
     public readonly lineThickness: number = 2;
-    public readonly lineActiveColor: string = Settings.PRIMARY_COLOR;
+    public readonly lineActiveColor: string = Settings.SECONDARY_COLOR;
     public readonly lineInactiveColor: string = "#fff";
+    public readonly lineColorLeftSide: string = "red";
+    public readonly lineColorRightSide: string = "lightgreen";
     public readonly crossHairLineColor: string = "#fff";
     public readonly crossHairPadding: number = 25;
     public readonly anchorSize: ISize = {

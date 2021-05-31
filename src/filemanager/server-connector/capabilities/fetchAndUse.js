@@ -148,21 +148,32 @@ async function handler(apiOptions, actions) {
                     newLabelPoint.side = KtkActions.getSideFromSymbol( newLabelPoint.symbol );
                     newImageData.labelPoints.push( newLabelPoint );
                   }
-                } else if (actLabelString.includes("rect")) { // load RectLabels (symbols) from symbolsfield
+
+                // load RectLabels (symbols) from symbolsfield
+                } else if (actLabelString.includes("rect")) { 
                   if( actNumberParts.length >= 5  ) {
+                    
+
                     let rect = {x:Number(actNumberParts[1]),
                         y:Number(actNumberParts[2]),
                         height:Number(actNumberParts[4])-Number(actNumberParts[2]),
                         width:Number(actNumberParts[3])-Number(actNumberParts[1])
                     }
-                    const actLabelFullname = actParts[1].replaceAll("[","").replaceAll("]","");
+
+                    const actLabelFullNameAndSideArr = actParts[1].replaceAll("[","").replaceAll("]","").split(";");
+                    const actLabelFullname = actLabelFullNameAndSideArr[0];
+                    
                     const symbol = KtkSelector.getSymbolsContent().find( s => s.fullname == actLabelFullname);
-                    console.log(actLabelFullname);
-                    console.log( symbol);
-                    let newLabelRect = LabelUtil.createLabelRect(symbol.id, rect);
+                    if (!symbol) {
+                      console.log( "symbol not found: " + actLabelFullname );
+                    }
+                    let newLabelRect = LabelUtil.createLabelRect((symbol ? symbol.id : null), rect);
                     // add symbol object
                     newLabelRect.symbol = symbol;
-                    newLabelRect.side = KtkActions.getRectLabelSideFromPoints( newLabelRect, newImageData.labelPoints );
+                    
+                    let actLabelSide = actLabelFullNameAndSideArr.length == 2 ? actLabelFullNameAndSideArr[1].replaceAll("Side:", "") : KtkActions.getRectLabelSideFromPoints( newLabelRect, newImageData.labelPoints );;
+    
+                    newLabelRect.side = actLabelSide;//
                     newImageData.labelRects.push( newLabelRect );
                   }
                 } else {

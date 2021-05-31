@@ -33,6 +33,7 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
         })
     };
 
+    
     return (
         <div className="TopNavigationBar">
             <StateBar/>
@@ -49,6 +50,7 @@ const TopNavigationBar: React.FC<IProps> = ({updateActivePopupType, updateProjec
                     <DropDownMenu/>
                 </div>
                 <div className="NavigationBarGroupWrapper middle">
+                    
                     {/*
                     <div className="ProjectName">Project Name:</div>
                     <TextInput

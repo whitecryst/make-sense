@@ -90,6 +90,7 @@ export type ImageData = {
 
     //KtK
     ktk_imageSeriesContent:ImageSeriesContent;
+
 }
 
 export type LabelsState = {

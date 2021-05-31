@@ -43,6 +43,7 @@ const EditorContainer: React.FC<IProps> = (
     const [leftTabStatusImages, setLeftTabStatusImages] = useState(true);
     const [leftTabStatusFolders, setLeftTabStatusFolders] = useState(false);
     const [rightTabStatus, setRightTabStatus] = useState(true);
+    const [updateNow, setUpdateNow] = useState(true);
 
     const calculateEditorSize = (): ISize => {
         if (windowSize) {
@@ -147,8 +148,17 @@ const EditorContainer: React.FC<IProps> = (
 
     const rightSideBarRender = () => {
         return <LabelsToolkit 
+            renderEditorTitle={useForceUpdate}
         />
     };
+
+    function useForceUpdate(){
+        setUpdateNow(!updateNow);
+    }
+
+    
+
+
 
     return (
         <div className="EditorContainer">
@@ -177,6 +187,16 @@ const EditorContainer: React.FC<IProps> = (
                 {projectType === ProjectType.OBJECT_DETECTION && <EditorTopNavigationBar
                     key="editor-top-navigation-bar"
                 />}
+                <div style={{color:'white', fontSize:'small', fontWeight:'normal', textAlign:'left'}}>
+                    {imagesData[activeImageIndex] && imagesData[activeImageIndex].ktk_imageSeriesContent.technique && imagesData[activeImageIndex].ktk_imageSeriesContent.technique.footTechnique && <div>
+                        Feet: {imagesData[activeImageIndex].ktk_imageSeriesContent.technique.footTechnique.replaceAll(" ///  ///","")}</div>}
+
+                    {imagesData[activeImageIndex] && imagesData[activeImageIndex].ktk_imageSeriesContent.technique && imagesData[activeImageIndex].ktk_imageSeriesContent.technique.handTechnique && <div>
+                        Hands: {imagesData[activeImageIndex].ktk_imageSeriesContent.technique.handTechnique.replaceAll(" ///  ///","")}</div>}
+
+                    {imagesData[activeImageIndex] && imagesData[activeImageIndex].ktk_imageSeriesContent.technique && imagesData[activeImageIndex].ktk_imageSeriesContent.technique.kungfuTechnique && <div>
+                    Technique: {imagesData[activeImageIndex].ktk_imageSeriesContent.technique.kungfuTechnique.replaceAll(" ///  ///","")}</div>}
+                </div>
                 <Editor
                     size={calculateEditorSize()}
                     imageData={imagesData[activeImageIndex]}

@@ -32,6 +32,7 @@ interface IProps {
     updateActiveLabelId: (highlightedLabelId: string) => any;
     updateActivePopupType: (activePopupType: PopupWindowType) => any;
     imageData: ImageData;
+    setRectSide: (labelId: string, side:Side) => any;
 }
 
 interface IState {
@@ -155,13 +156,14 @@ class LabelInputField extends React.Component<IProps, IState> {
                 height: size.height,
             }}><LabelSelect 
                 onDelete={onDelete} 
-                labelRectId={id} 
+                labelId={id} 
                 highlightLabel={this.mouseEnterHandler} 
                 imageData={this.props.imageData}
                 onSelectLabel={ this.props.onSelectLabel }
                 //labelOptions= {this.props.options }
                 value={this.props.value}
                 //defaultSymbolId={ value ? value.id : "" }
+                setRectSide={this.props.setRectSide}
              />
             
             {/*

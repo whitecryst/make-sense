@@ -28,6 +28,7 @@ interface IProps {
     updateImageDataById: (id: string, newImageData: ImageData) => any;
     updateActiveLabelType: (activeLabelType: LabelType) => any;
     updateActiveLabelId: (highlightedLabelId: string) => any;
+    renderEditorTitle: () => any;
 }
 
 interface IState {
@@ -140,6 +141,7 @@ class LabelsToolkit extends React.Component<IProps, IState> {
                             height: activeTabContentHeight - 20
                         }}
                         imageData={imagesData[activeImageIndex]}
+                        renderEditorTitle={this.props.renderEditorTitle}
                     />}
                     {labelType === LabelType.POINT && <PointLabelsList
                         size={{

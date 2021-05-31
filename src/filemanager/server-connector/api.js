@@ -64,10 +64,10 @@ async function addKtkIdToResource(resource) {
   let ktkData = KtkSelector.getImageSeriesContentByfilePath( resource );
   
   if( ktkData != null ) {
-    if( ktkData.seriesId == "0" && ktkData.imageId == "0" ) {
+    if( ktkData.seriesId === "0" && ktkData.imageId === "0" ) {
       resource.ktk_id = "-";  
     } else {
-      let hasAnnotationMarker = (ktkData.imageMap != null && ktkData.imageMap != "") ? " *" : "";
+      let hasAnnotationMarker = (ktkData.imageMap !== null && ktkData.imageMap !== "") ? " *" : "";
       resource.ktk_id = ktkData.seriesId + "_" + ktkData.imageId+hasAnnotationMarker;
     }
     resource.ktk_imageSeriesContent = ktkData;

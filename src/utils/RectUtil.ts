@@ -22,6 +22,25 @@ export class RectUtil {
         );
     }
 
+    /**
+     * check, if r1 fully contains r2 (r2 is smaller or equal size and all anchorPoints are within r1)
+     * @param r1 parent rect
+     * @param r2 possible child rect
+     */
+    public static isRectInside(r1: IRect, r2:IRect ) {
+        if (!r1 || !r2) return null;
+
+        // serach for an AnchorPoint of r2 that is NOT inside r1
+        for( let actAnchorPoint of this.mapRectToAnchors( r2 ) ) {
+            const actPoint = { x: actAnchorPoint.position.x, y: actAnchorPoint.position.y};
+            if( ! this.isPointInside( r1, actPoint ) ) {
+                return false;
+            }
+        }
+        // all points of r2 are inside r1
+        return true;
+    }
+
     public static isPointInside(rect: IRect, point: IPoint): boolean {
         if (!rect || !point) return null;
         return (

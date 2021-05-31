@@ -3,7 +3,7 @@ import {RenderEngineConfig} from "../../settings/RenderEngineConfig";
 import {IPoint} from "../../interfaces/IPoint";
 import {CanvasUtil} from "../../utils/CanvasUtil";
 import {store} from "../../index";
-import {ImageData, LabelPoint} from "../../store/labels/types";
+import {ImageData, LabelPoint, Side} from "../../store/labels/types";
 import { v4 as uuidv4 } from 'uuid';
 import {
     updateActiveLabelId,
@@ -134,7 +134,19 @@ export class PointRenderEngine extends BaseRenderEngine {
     private renderPoint(labelPoint: LabelPoint, isActive: boolean, data: EditorData) {
         const pointOnImage: IPoint = RenderEngineUtil.transferPointFromImageToViewPortContent(labelPoint.point, data);
         const pointBetweenPixels = RenderEngineUtil.setPointBetweenPixels(pointOnImage);
-        const handleColor: string = isActive ? this.config.activeAnchorColor : this.config.inactiveAnchorColor;
+        
+        let inactiveAnchorColor = this.config.inactiveAnchorColor;
+        if( labelPoint.side ) {
+            switch(labelPoint.side) {
+                case Side.LEFT:
+                    inactiveAnchorColor= this.config.lineColorLeftSide;
+                    break;
+                case Side.RIGHT:
+                    inactiveAnchorColor= this.config.lineColorRightSide;
+                    break;
+            }
+        }
+        const handleColor: string = isActive ? this.config.activeAnchorColor : inactiveAnchorColor;
         DrawUtil.drawCircleWithFill(this.canvas, pointBetweenPixels, Settings.RESIZE_HANDLE_DIMENSION_PX/2, handleColor)
     }
 

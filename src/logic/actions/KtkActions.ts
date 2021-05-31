@@ -3,7 +3,7 @@ import {store} from "../../index";
 import {updateImageSeriesMeta, updateImageSeriesContent, updateImageSeriesContentRow, updateSymbolsContent, addSymbolsContentRow} from "../../store/ktk/actionCreators";
 import {ViewPortActions} from "./ViewPortActions";
 import {EditorModel} from "../../staticModels/EditorModel";
-import { ImageSeriesMeta, ImageSeriesContent, SymbolsContent, PostureContent } from "../../store/ktk/types";
+import { ImageSeriesMeta, ImageSeriesContent, SymbolsContent, PostureContent, SymbolCategory, TechniqueOrientation } from "../../store/ktk/types";
 import { KtkSelector } from "../../store/selectors/KtkSelector";
 import { COCOAnnotationsLoadingError } from "../import/coco/COCOErrors";
 import {ImageData, LabelName, LabelRect, LabelPoint, Side} from "../../store/labels/types";
@@ -16,23 +16,24 @@ export class KtkActions {
     public static getRectLabelSideFromPoints(labelRect:LabelRect, labelPoints:LabelPoint[] ):Side {
         // get side
         let side = Side.UNKNOWN;
-        let isLeft = false;
-        let isRight = false;
+        let isLeft = 0;
+        let isRight = 0;
         for( let actPointLabel of labelPoints ) {
             if( RectUtil.isPointInside(labelRect.rect, actPointLabel.point ) ) {
                 
                 if( actPointLabel.side == Side.LEFT) {
-                    isLeft = true;
+                    isLeft += 1;
                 } else if( actPointLabel.side == Side.RIGHT) {
-                    isRight = true;
+                    isRight += 1;
                 }
             }
         }
-        if( isLeft && isRight ) {
+
+        if( isLeft == isRight ) {
             side = Side.UNAMBIGIOUS;
-        } else if( isLeft && !isRight ) {
+        } else if( isLeft > isRight ) {
             side = Side.LEFT;
-        } else if( !isLeft && isRight) {
+        } else if( isLeft < isRight) {
             side = Side.RIGHT;
         }
 
@@ -157,7 +158,7 @@ export class KtkActions {
         console.log(sheet.title);
         console.log( numrows );
         // read cells
-        await sheet.loadCells('A1:G'+sheet.rowCount);
+        await sheet.loadCells('A1:K'+sheet.rowCount);
         
         // read/write row values
         
@@ -170,19 +171,73 @@ export class KtkActions {
             let actSymbolIds = sheet.getCell(i, 5).value;
             let actPostureContentString = sheet.getCell(i, 6).value;
             let actPostureContent = this.parsePostureContentString( actPostureContentString );
+            let actTechniqueContent = {
+                handTechnique: sheet.getCell(i, 8).value,
+                footTechnique: sheet.getCell(i, 9).value,
+                kungfuTechnique: sheet.getCell(i, 10).value
+            }  
             let actContent:ImageSeriesContent = {
                 seriesId: seriesId,
                 imageId: actImageId,
                 url: actImageUrl,
                 imageMap: actImageMap,
-                //symbolIds: actSymbolIds
-                posture: actPostureContent
+                posture: actPostureContent,
+                technique: actTechniqueContent,
+                sheetRow: i
             }; 
             content.push(actContent);
         }
         store.dispatch( updateImageSeriesContent(content) );
         console.log( "KtK ImageSeriesContent updated" );  
           
+    }
+
+    public static async fetchImageSeriesContentRow( imageSeriesContent: ImageSeriesContent ): Promise<ImageSeriesContent> {
+        // get ktk imageSeriesId  from google sheets
+        console.log( "fetchImageSeriesConrentRow: "+imageSeriesContent.sheetRow);
+        console.log("try to connect to google sheets");
+        const { GoogleSpreadsheet } = require('google-spreadsheet');
+        const creds = require('../../GoogleSheetCredentials.json'); // the file saved above
+        // Initialize the sheet - doc ID is the long id in the sheets URL
+        const doc = new GoogleSpreadsheet('17Mdd7GZFlaZ169M7bJqiUf5WV437MCZ25_Hw9fgfJF8');
+        await doc.useServiceAccountAuth(creds);
+        await doc.loadInfo(); // loads document properties and worksheets
+        console.log(doc.title);
+        const sheet = doc.sheetsByTitle['ImageSeriesContent']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+        const numrows = sheet.rowCount;
+        console.log(sheet.title);
+        console.log( numrows );
+        // read cells
+        // get only one row of the wanted imageSeriesContent
+        let i = imageSeriesContent.sheetRow;
+        await sheet.loadCells('A'+(i+1)+':K'+(i+1));
+        
+        // read/write row values
+        let content = [];
+        let seriesId = sheet.getCell(i, 0).value;
+        let actImageId = sheet.getCell(i, 1).value;
+        let actImageUrl = sheet.getCell(i, 2).value; 
+        let actImageMap = sheet.getCell(i, 4).value; 
+        let actSymbolIds = sheet.getCell(i, 5).value;
+        let actPostureContentString = sheet.getCell(i, 6).value;
+        let actPostureContent = this.parsePostureContentString( actPostureContentString );
+        let actTechniqueContent = {
+            handTechnique: sheet.getCell(i, 8).value,
+            footTechnique: sheet.getCell(i, 9).value,
+            kungfuTechnique: sheet.getCell(i, 10).value
+        }  
+        imageSeriesContent.seriesId= seriesId;
+        imageSeriesContent.imageId= actImageId;
+        imageSeriesContent.url= actImageUrl;
+        imageSeriesContent.imageMap= actImageMap;
+        imageSeriesContent.posture= actPostureContent;
+        imageSeriesContent.technique= actTechniqueContent;
+        imageSeriesContent.sheetRow= i;
+        
+        //content.push(imageSeriesContent);
+        //store.dispatch( updateImageSeriesContent(content) );
+        console.log( "KtK ImageSeriesContentRow fetched" );  
+        return imageSeriesContent
     }
 
     public static async udateImageAnnotation( imageData:ImageData ): Promise<any> {
@@ -204,108 +259,96 @@ export class KtkActions {
         const sheet = doc.sheetsByTitle['ImageSeriesContent']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
         const numrows = sheet.rowCount;
         console.log(sheet.title);
-        await sheet.loadCells('A1:H'+numrows);
+        //await sheet.loadCells('A1:H'+numrows);
         
         //find rowNr to insert image content
-        let existingRowNr = null;
-        for( let rowNr = 1; rowNr < numrows; rowNr++ ) {
-            //get cells from act sheet row
-            let seriesIdCell = sheet.getCell(rowNr, 0);
-            let imageIdCell = sheet.getCell(rowNr, 1);
-            let urlCell = sheet.getCell(rowNr, 2);
-
-            // if act row is of the same image series and image id
-            if( String(seriesIdCell.value).localeCompare(iSC.seriesId) == 0 &&
-                String(urlCell.value).localeCompare(iSC.url) == 0 && 
-                String(imageIdCell.value).localeCompare(iSC.imageId) == 0 ) {
-                if( existingRowNr != null ) {
-                    console.error( "Image has more than one entry!!! rowNrs:"+existingRowNr+","+rowNr );
-                }
-                existingRowNr = rowNr;
-            }
-        } 
+        let rowToUpdate = imageData.ktk_imageSeriesContent.sheetRow;
+        await sheet.loadCells('A'+(rowToUpdate+1)+':K'+(rowToUpdate+1));
              
-        if( existingRowNr != null ) {
-            // create image Map
+        // create image Map
+        let imageMap:String = "";
+        imageMap += imageData.labelPoints.map( p => "circle "+toInteger(p.point.x)+" "+toInteger(p.point.y)+" 20 [["+p.symbol.fullname+"]]" ).join("\n") + "\n";
+        imageMap += imageData.labelRects.filter( r => r.symbol )
+            .map( r => "rect "
+                +toInteger(r.rect.x)+" "
+                +toInteger(r.rect.y)+" "
+                +toInteger(r.rect.x+r.rect.width)+" "
+                +toInteger(r.rect.y+r.rect.height)
+                +" [["+r.symbol.fullname+"]]"+
+                ";Side:"+r.side 
+            ).join("\n");
+        
+        //create List of symbolIds
+        let symbolIdsArr:String[] = imageData.labelRects.map(r => r.labelId);
+        let symbolIds:String = symbolIdsArr.join(",");
 
-            let imageMap:String = "";
-            imageMap += imageData.labelPoints.map( p => "circle "+toInteger(p.point.x)+" "+toInteger(p.point.y)+" 20 [["+p.symbol.fullname+"]]" ).join("\n") + "\n";
-            imageMap += imageData.labelRects.map( r => "rect "+toInteger(r.rect.x)+" "+toInteger(r.rect.y)+" "+toInteger(r.rect.x+r.rect.width)+" "+toInteger(r.rect.y+r.rect.height)+" [["+r.symbol.fullname+"]]" ).join("\n");
+        //console.log( symbolIdsArr );
+        //console.log( imageData.labelRects );
+        
+        // create hash of symbol ids to identify techniques
+        const symbols = KtkSelector.getSymbolsContent() ;
+        const leftHandSymbol = imageData.labelRects.find( lr => lr.symbol ? lr.symbol.category.includes( "Hand posture" ) && lr.side == Side.LEFT : false);
+        const rightHandSymbol = imageData.labelRects.find( lr => lr.symbol ? lr.symbol.category.includes( "Hand posture" ) && lr.side == Side.RIGHT : false);
+        const leftArmSymbol = imageData.labelRects.find( lr => lr.symbol ? lr.symbol.category.includes( "Arm posture" )  && lr.side == Side.LEFT : false);
+        const rightArmSymbol = imageData.labelRects.find( lr => lr.symbol ? lr.symbol.category.includes( "Arm posture" ) && lr.side == Side.RIGHT : false);
+        const leftLegSymbol = imageData.labelRects.find( lr => lr.symbol ? lr.symbol.category.includes( "Leg posture" ) && lr.side == Side.LEFT : false);
+        const rightLegSymbol = imageData.labelRects.find( lr => lr.symbol ? lr.symbol.category.includes( "Leg posture" ) && lr.side == Side.RIGHT : false);
+        const leftFootSymbol = imageData.labelRects.find( lr => lr.symbol ? lr.symbol.category.includes( "Foot posture" ) && lr.side == Side.LEFT : false);
+        const rightFootSymbol = imageData.labelRects.find( lr => lr.symbol ? lr.symbol.category.includes( "Foot posture" ) && lr.side == Side.RIGHT : false);
+        const bodySymbol = imageData.labelRects.find( lr => lr.symbol ? lr.symbol.category.includes( "Body posture" ) : false );
+        
+
+        const handTechniqueHash:String = ""
+            +  (leftHandSymbol != undefined ? leftHandSymbol.labelId : "_")+ ","
+            +  (leftArmSymbol != undefined ? leftArmSymbol.labelId : "_") + "|"
+            +  (rightHandSymbol != undefined ? rightHandSymbol.labelId : "_") + ","
+            +  (rightArmSymbol != undefined ? rightArmSymbol.labelId : "_") + "|"
+            +  (bodySymbol != undefined ? bodySymbol.labelId : "_");
+
+            const handTechniqueHashInverse:String = ""
+            +  (rightHandSymbol != undefined ? rightHandSymbol.labelId : "_") + ","
+            +  (rightArmSymbol != undefined ? rightArmSymbol.labelId : "_") + "|"
+            +  (leftHandSymbol != undefined ? leftHandSymbol.labelId : "_")+ ","
+            +  (leftArmSymbol != undefined ? leftArmSymbol.labelId : "_") + "|"
+            +  (bodySymbol != undefined ? bodySymbol.labelId : "_");
+
+        const footTechniqueHash:String = ""
+            +  (leftFootSymbol != undefined ? leftFootSymbol.labelId : "_") + ","
+            +  (leftLegSymbol != undefined ? leftLegSymbol.labelId : "_") + "|"
+            +  (rightFootSymbol != undefined ? rightFootSymbol.labelId : "_") + ","
+            +  (rightLegSymbol != undefined ? rightLegSymbol.labelId : "_");
+
+            const footTechniqueHashInverse:String = ""
+            +  (rightFootSymbol != undefined ? rightFootSymbol.labelId : "_") + ","
+            +  (rightLegSymbol != undefined ? rightLegSymbol.labelId : "_")+ "|"
+            +  (leftFootSymbol != undefined ? leftFootSymbol.labelId : "_") + ","
+            +  (leftLegSymbol != undefined ? leftLegSymbol.labelId : "_") ;
             
-            //create List of symbolIds
-            let symbolIdsArr:String[] = imageData.labelRects.map(r => r.labelId);
-            let symbolIds:String = symbolIdsArr.join(",");
-
-            console.log( symbolIdsArr );
-            console.log( imageData.labelRects );
             
-            // create hash of symbol ids to identify techniques
-            const symbols = KtkSelector.getSymbolsContent() ;
-            const leftHandSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Hand posture" ) && lr.side == Side.LEFT );
-            const rightHandSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Hand posture" ) && lr.side == Side.RIGHT );
-            const leftArmSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Arm posture" ) && lr.side == Side.LEFT );
-            const rightArmSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Arm posture" ) && lr.side == Side.RIGHT );
-            const leftLegSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Leg posture" ) && lr.side == Side.LEFT );
-            const rightLegSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Leg posture" ) && lr.side == Side.RIGHT );
-            const leftFootSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Foot posture" ) && lr.side == Side.LEFT );
-            const rightFootSymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Foot posture" ) && lr.side == Side.RIGHT );
-            const bodySymbol = imageData.labelRects.find( lr => lr.symbol.category.includes( "Body posture" ) );
-            
+        const kungfuTechniqueHash:String = handTechniqueHash + "#" + footTechniqueHash;
+        const kungfuTechniqueHashInverse:String = handTechniqueHashInverse + "#" + footTechniqueHashInverse;
+        console.log( "kungfuTechniqueHash:"+kungfuTechniqueHash );
+        console.log( "kungfuTechniqueHashInverse:"+kungfuTechniqueHashInverse );
+        //console.log( "existing:"+existingRowNr );
+        let imageMapCell = sheet.getCell(rowToUpdate, 4);
+        let symbolIdsCell = sheet.getCell(rowToUpdate, 5);
+        let symbolIdsHashCell = sheet.getCell(rowToUpdate, 6);
+        let symbolIdsHashInverseCell = sheet.getCell(rowToUpdate, 7);
 
-            const handTechniqueHash:String = ""
-             +  (leftHandSymbol != undefined ? leftHandSymbol.labelId : "_")+ ","
-             +  (leftArmSymbol != undefined ? leftArmSymbol.labelId : "_") + "|"
-             +  (rightHandSymbol != undefined ? rightHandSymbol.labelId : "_") + ","
-             +  (rightArmSymbol != undefined ? rightArmSymbol.labelId : "_") + "|"
-             +  (bodySymbol != undefined ? bodySymbol.labelId : "_");
-
-             const handTechniqueHashInverse:String = ""
-             +  (rightHandSymbol != undefined ? rightHandSymbol.labelId : "_") + ","
-             +  (rightArmSymbol != undefined ? rightArmSymbol.labelId : "_") + "|"
-             +  (leftHandSymbol != undefined ? leftHandSymbol.labelId : "_")+ ","
-             +  (leftArmSymbol != undefined ? leftArmSymbol.labelId : "_") + "|"
-             +  (bodySymbol != undefined ? bodySymbol.labelId : "_");
-
-            const footTechniqueHash:String = ""
-             +  (leftFootSymbol != undefined ? leftFootSymbol.labelId : "_") + ","
-             +  (leftLegSymbol != undefined ? leftLegSymbol.labelId : "_") + "|"
-             +  (rightFootSymbol != undefined ? rightFootSymbol.labelId : "_") + ","
-             +  (rightLegSymbol != undefined ? rightLegSymbol.labelId : "_");
-
-             const footTechniqueHashInverse:String = ""
-             +  (rightFootSymbol != undefined ? rightFootSymbol.labelId : "_") + ","
-             +  (rightLegSymbol != undefined ? rightLegSymbol.labelId : "_")+ "|"
-             +  (leftFootSymbol != undefined ? leftFootSymbol.labelId : "_") + ","
-             +  (leftLegSymbol != undefined ? leftLegSymbol.labelId : "_") ;
-             
-             
-            const kungfuTechniqueHash:String = handTechniqueHash + "#" + footTechniqueHash;
-            const kungfuTechniqueHashInverse:String = handTechniqueHashInverse + "#" + footTechniqueHashInverse;
-            console.log( "kungfuTechniqueHash:"+kungfuTechniqueHash );
-            console.log( "kungfuTechniqueHashInverse:"+kungfuTechniqueHashInverse );
-            //console.log( "existing:"+existingRowNr );
-            let rowToUpdate = existingRowNr;
-            let imageMapCell = sheet.getCell(rowToUpdate, 4);
-            let symbolIdsCell = sheet.getCell(rowToUpdate, 5);
-            let symbolIdsHashCell = sheet.getCell(rowToUpdate, 6);
-            let symbolIdsHashInverseCell = sheet.getCell(rowToUpdate, 7);
-
-            // update the cell contents and formatting
-            let date = new Date().toLocaleString()
-            imageMapCell.value = imageMap;
-            symbolIdsCell.value = symbolIds;
-            symbolIdsHashCell.value = kungfuTechniqueHash;
-            symbolIdsHashInverseCell.value = kungfuTechniqueHashInverse;
-            const updateNote = 'Updated via KtK-Commandbridge at '+ date;
-            imageMapCell.note = updateNote;
-            symbolIdsCell.note = updateNote;
-            symbolIdsHashCell.note = updateNote;
-            symbolIdsHashInverseCell.note = updateNote;
-            await sheet.saveUpdatedCells(); // save all updates in one call
-            console.log("...updated sheet!");
-        } else {
-            console.error( "unable to find existing imageSeriesContent row: "+iSC.seriesId+"_"+iSC.imageId );
-        }
+        // update the cell contents and formatting
+        let date = new Date().toLocaleString()
+        imageMapCell.value = imageMap;
+        symbolIdsCell.value = symbolIds;
+        symbolIdsHashCell.value = kungfuTechniqueHash;
+        symbolIdsHashInverseCell.value = kungfuTechniqueHashInverse;
+        const updateNote = 'Updated via KtK-Commandbridge at '+ date;
+        imageMapCell.note = updateNote;
+        symbolIdsCell.note = updateNote;
+        symbolIdsHashCell.note = updateNote;
+        symbolIdsHashInverseCell.note = updateNote;
+        await sheet.saveUpdatedCells(); // save all updates in one call
+        console.log("...updated immageSeriesContent in sheet!");
+        
         
     }
 
@@ -521,18 +564,6 @@ export class KtkActions {
                         imgUrl: url,
                         fullname: fullName,
                     };
-                    // a posture symbol is either for left or right (arm, leg). later, this will beremoved when the side is determined by poseNet
-                    /*if( actContent.category.includes( "posture" ) && !actContent.category.includes( "Body" ) ) {
-                        //create to symbols for left and right
-                        let leftContent = Object.assign({}, actContent);
-                        let rightContent = Object.assign({}, actContent);
-                        leftContent.category = "Left "+leftContent.category;
-                        rightContent.category = "Right "+rightContent.category;
-                        content.push(leftContent);
-                        content.push(rightContent);
-                    } else {
-                        content.push(actContent);
-                    }*/
 
                     content.push(actContent);
                     labelCount += 1;
@@ -608,14 +639,251 @@ export class KtkActions {
         fullnameCell.value = symbolsContentRow.fullname;
         imageCell.value ='=IMAGE( QUERY(IMPORTRANGE("17Mdd7GZFlaZ169M7bJqiUf5WV437MCZ25_Hw9fgfJF8", "ImageSeriesContent!A2:E10000"), "SELECT Col3 WHERE Col1=43 AND Col2="&A'+(rowToUpdate+1)+') )';
         await sheet.saveUpdatedCells(); // save all updates in one call
-        console.log("...updated sheet!");
+        console.log("...updated ImageSymbols sheet!");
         // update imageSeriesContent in redux store
         symbolsContentRow.id = String(newSymbolId);
+        
         
         store.dispatch( addSymbolsContentRow( symbolsContentRow ) );
         console.log("...updated store!");
                 
         return newSymbolId;    
         
+    }
+
+    public static async addTechniqueContent( imageData:ImageData, newTechniqueRectLabel:LabelRect ) {
+
+        const techniqueRects: LabelRect[] = [];
+        for( let actRectLabel of imageData.labelRects ) {
+            if( actRectLabel.id != newTechniqueRectLabel.id 
+              && RectUtil.isRectInside( newTechniqueRectLabel.rect, actRectLabel.rect)  ) {
+                // use actRect for technique definition
+                techniqueRects.push( actRectLabel );
+            }
+        }
+
+        switch( newTechniqueRectLabel.symbol.category ) {
+            case SymbolCategory.HAND_TECHNIQUE:
+                this.addHandTechniqueContentFromRects( newTechniqueRectLabel, imageData );
+                break;
+            case SymbolCategory.FOOT_TECHNIQUE:
+                this.addFootTechniqueContentFromRects( newTechniqueRectLabel, imageData );
+                break;
+            case SymbolCategory.KUNGFU_TECHNIQUE:
+                
+                break;
+        }
+        
+    }
+
+    private static async addHandTechniqueContentFromRects(techniqueRect:LabelRect, imageData: ImageData ) {
+        console.log("try to connect to google sheets");
+        const { GoogleSpreadsheet } = require('google-spreadsheet');
+        const creds = require('../../GoogleSheetCredentials.json'); // the file saved above
+        // Initialize the sheet - doc ID is the long id in the sheets URL
+        const doc = new GoogleSpreadsheet('17Mdd7GZFlaZ169M7bJqiUf5WV437MCZ25_Hw9fgfJF8');
+        await doc.useServiceAccountAuth(creds);
+        await doc.loadInfo(); // loads document properties and worksheets
+        console.log(doc.title);
+        const sheet = doc.sheetsByTitle['HandTechniques']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+        const numrows = sheet.rowCount;
+        console.log(sheet.title);
+        console.log( numrows ); 
+        await sheet.loadCells('A1:L'+numrows);
+        
+        //find rowNr to insert content
+        let rowToUpdate = null;
+        
+        for( let rowNr = 1; rowNr <= numrows; rowNr++ ) {
+            //get cells from act sheet row
+            let symbolIdCell = sheet.getCell(rowNr, 0);
+            
+            // check if act row is the technique we are searching for
+            if( !symbolIdCell.value ) {
+                break;
+            } else { //if not empty row, check id
+                if( Number(symbolIdCell.value) == Number(techniqueRect.symbol.id) ) {
+                    rowToUpdate = rowNr;
+                    break;
+                }
+            }
+        }
+
+        if( !rowToUpdate ) {
+            console.log ("unable to fill handTechnique content, no technique with with id: '"+techniqueRect.symbol.id+"' found"); 
+            return;
+        }       
+
+        let techniqueOrientationCell = sheet.getCell(rowToUpdate, 4);
+        let leftHandPostureCell = sheet.getCell(rowToUpdate, 5);  
+        let leftArmPostureCell = sheet.getCell(rowToUpdate, 6);  
+        let rightHandPostureCell = sheet.getCell(rowToUpdate, 8);
+        let rightArmPostureCell = sheet.getCell(rowToUpdate, 9);
+        let bodyPostureCell = sheet.getCell(rowToUpdate, 11);  
+
+        // get orientation from rect side
+        let orientation = '';
+        switch (techniqueRect.side) {
+            case Side.LEFT:
+                orientation = TechniqueOrientation.LEFT_ARM_FRONT;
+                break;
+            case Side.RIGHT:
+                orientation = TechniqueOrientation.RIGHT_ARM_FRONT;
+                break;
+            case Side.NONE:
+                orientation = TechniqueOrientation.BOTH_ARMS_EQUAL;
+                break;
+        }
+
+        // update the cell posture contents
+        techniqueOrientationCell.value = orientation;
+        leftHandPostureCell.value = imageData.ktk_imageSeriesContent.posture.leftHand.name;
+        rightHandPostureCell.value = imageData.ktk_imageSeriesContent.posture.rightHand.name;
+        leftArmPostureCell.value = imageData.ktk_imageSeriesContent.posture.leftArm.name;
+        rightArmPostureCell.value = imageData.ktk_imageSeriesContent.posture.rightArm.name;
+        bodyPostureCell.value = imageData.ktk_imageSeriesContent.posture.body.name;
+
+        await sheet.saveUpdatedCells(); // save all updates in one call
+        console.log("...updated HandTechniques sheet!");
+                
+    }
+
+    private static async addFootTechniqueContentFromRects(techniqueRect:LabelRect, imageData: ImageData ) {
+        console.log("try to connect to google sheets");
+        const { GoogleSpreadsheet } = require('google-spreadsheet');
+        const creds = require('../../GoogleSheetCredentials.json'); // the file saved above
+        // Initialize the sheet - doc ID is the long id in the sheets URL
+        const doc = new GoogleSpreadsheet('17Mdd7GZFlaZ169M7bJqiUf5WV437MCZ25_Hw9fgfJF8');
+        await doc.useServiceAccountAuth(creds);
+        await doc.loadInfo(); // loads document properties and worksheets
+        console.log(doc.title);
+        const sheet = doc.sheetsByTitle['FootTechniques']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+        const numrows = sheet.rowCount;
+        console.log(sheet.title);
+        console.log( numrows ); 
+        await sheet.loadCells('A1:K'+numrows);
+        
+        //find rowNr to insert content
+        let rowToUpdate = null;
+        
+        for( let rowNr = 1; rowNr <= numrows; rowNr++ ) {
+            //get cells from act sheet row
+            let symbolIdCell = sheet.getCell(rowNr, 0);
+            
+            // check if act row is the technique we are searching for
+            if( !symbolIdCell.value ) {
+                break;
+            } else { //if not empty row, check id
+                if( Number(symbolIdCell.value) == Number(techniqueRect.symbol.id) ) {
+                    rowToUpdate = rowNr;
+                    break;
+                }
+            }
+        }
+
+        if( !rowToUpdate ) {
+            console.log ("unable to fill footTechnique content, no technique with with id: '"+techniqueRect.symbol.id+"' found"); 
+            return;
+        }       
+
+        let techniqueOrientationCell = sheet.getCell(rowToUpdate, 5);
+        let leftFootPostureCell = sheet.getCell(rowToUpdate, 6);  
+        let leftLegPostureCell = sheet.getCell(rowToUpdate, 7);  
+        let rightFootPostureCell = sheet.getCell(rowToUpdate, 9);
+        let rightLegPostureCell = sheet.getCell(rowToUpdate, 10);
+        
+        // get orientation from rect side
+        let orientation = '';
+        switch (techniqueRect.side) {
+            case Side.LEFT:
+                orientation = TechniqueOrientation.LEFT_FOOT_FRONT;
+                break;
+            case Side.RIGHT:
+                orientation = TechniqueOrientation.RIGHT_FOOT_FRONT;
+                break;
+            case Side.NONE:
+                orientation = TechniqueOrientation.BOTH_FOOT_EQUAL;
+                break;
+        }
+
+        // update the cell posture contents
+        techniqueOrientationCell.value = orientation;
+        leftFootPostureCell.value = imageData.ktk_imageSeriesContent.posture.leftFoot.name;
+        rightFootPostureCell.value = imageData.ktk_imageSeriesContent.posture.rightFoot.name;
+        leftLegPostureCell.value = imageData.ktk_imageSeriesContent.posture.leftLeg.name;
+        rightLegPostureCell.value = imageData.ktk_imageSeriesContent.posture.rightLeg.name;
+
+        await sheet.saveUpdatedCells(); // save all updates in one call
+        console.log("...updated FootTechniques sheet!");
+        
+    }
+
+    private static async addKungfuTechniqueFromRects(techniqueRect:LabelRect, imageData: ImageData  ) {
+        console.log("try to connect to google sheets");
+        const { GoogleSpreadsheet } = require('google-spreadsheet');
+        const creds = require('../../GoogleSheetCredentials.json'); // the file saved above
+        // Initialize the sheet - doc ID is the long id in the sheets URL
+        const doc = new GoogleSpreadsheet('17Mdd7GZFlaZ169M7bJqiUf5WV437MCZ25_Hw9fgfJF8');
+        await doc.useServiceAccountAuth(creds);
+        await doc.loadInfo(); // loads document properties and worksheets
+        console.log(doc.title);
+        const sheet = doc.sheetsByTitle['KungfuTechniques']; // or use doc.sheetsById[id] or doc.sheetsByTitle[title]
+        const numrows = sheet.rowCount;
+        console.log(sheet.title);
+        console.log( numrows ); 
+        await sheet.loadCells('A1:P'+numrows);
+        
+        //find rowNr to insert content
+        let rowToUpdate = null;
+        
+        for( let rowNr = 1; rowNr <= numrows; rowNr++ ) {
+            //get cells from act sheet row
+            let symbolIdCell = sheet.getCell(rowNr, 0);
+            
+            // check if act row is the technique we are searching for
+            if( !symbolIdCell.value ) {
+                break;
+            } else { //if not empty row, check id
+                if( Number(symbolIdCell.value) == Number(techniqueRect.symbol.id) ) {
+                    rowToUpdate = rowNr;
+                    break;
+                }
+            }
+        }
+
+        if( !rowToUpdate ) {
+            console.log ("unable to fill kungfuTechnique content, no technique with with id: '"+techniqueRect.symbol.id+"' found"); 
+            return;
+        }       
+
+        let techniqueOrientationCell = sheet.getCell(rowToUpdate, 5);
+        let leftFootPostureCell = sheet.getCell(rowToUpdate, 6);  
+        let leftLegPostureCell = sheet.getCell(rowToUpdate, 7);  
+        let rightFootPostureCell = sheet.getCell(rowToUpdate, 9);
+        let rightLegPostureCell = sheet.getCell(rowToUpdate, 10);
+        
+        // get orientation from rect side
+        let orientation = '';
+        switch (techniqueRect.side) {
+            case Side.LEFT:
+                orientation = TechniqueOrientation.LEFT_FOOT_FRONT;
+                break;
+            case Side.RIGHT:
+                orientation = TechniqueOrientation.RIGHT_FOOT_FRONT;
+                break;
+            case Side.NONE:
+                orientation = TechniqueOrientation.BOTH_FOOT_EQUAL;
+                break;
+        }
+
+        // update the cell posture contents
+        techniqueOrientationCell.value = orientation;
+        leftFootPostureCell.value = imageData.ktk_imageSeriesContent.posture.leftFoot.name;
+        rightFootPostureCell.value = imageData.ktk_imageSeriesContent.posture.rightFoot.name;
+        leftLegPostureCell.value = imageData.ktk_imageSeriesContent.posture.leftLeg.name;
+        rightLegPostureCell.value = imageData.ktk_imageSeriesContent.posture.rightLeg.name;
+
+        await sheet.saveUpdatedCells(); // save all updates in one call
+        console.log("...updated FootTechniques sheet!");
     }
 }

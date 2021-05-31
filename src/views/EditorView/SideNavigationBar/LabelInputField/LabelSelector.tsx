@@ -8,7 +8,7 @@ import { KtkSelector } from '../../../../store/selectors/KtkSelector';
 import { KtkActions } from '../../../../logic/actions/KtkActions';
 import { Settings } from '../../../../settings/Settings';
 import {ImageButton} from "../../../Common/ImageButton/ImageButton";
-import {ImageSeriesMeta, ImageSeriesContent, SymbolsContent} from "../../../../store/ktk/types";
+import {ImageSeriesMeta, ImageSeriesContent, SymbolsContent, SymbolCategory} from "../../../../store/ktk/types";
 import {ImageData, LabelName, LabelRect, Side} from "../../../../store/labels/types";
 import {IRect} from "../../../../interfaces/IRect";
 import TextInput from '../../../Common/TextInput/TextInput';
@@ -23,15 +23,13 @@ import { LabelsSelector } from '../../../../store/selectors/LabelsSelector';
 import {LabelType} from '../../../../../src/data/enums/LabelType';
 
 interface IProps {
-  labelRectId: string;
+  labelId: string;
   onDelete: (id: string) => any;
-//    onSelectLabel: (labelRectId: string, labelNameId: string) => any;
   highlightLabel: (highlightedLabelId: string) => any;
   imageData: ImageData;
   onSelectLabel: (labelRectId: string, symbolId: string, symbol:SymbolsContent) => any;
-  //defaultSymbolId:string;
-  //labelOptions: LabelName[];
   value: LabelName;
+  setRectSide: (labelId:string, side:Side) => any;
 }
   
 interface IState {
@@ -40,9 +38,10 @@ interface IState {
   addSymbolInUse: boolean;
   actSymbol: LabelName;
   actCategory: string;
-  addSymbolValue_Category;
+  symbolToAdd: SymbolsContent;
+  /*addSymbolValue_Category;
   addSymbolValue_Name;
-  addSymbolValue_Description;
+  addSymbolValue_Description;*/
   addSymbolImgBlob;
 
 }
@@ -57,9 +56,19 @@ class LabelSelect extends Component<IProps, IState>  {
         addSymbolInUse:false, 
         actSymbol:null, 
         actCategory:'', 
-        addSymbolValue_Category:'',
+        symbolToAdd:{
+          id:null,
+          category:null,
+          name:null,
+          fullname:null,
+          imgUrl:null,
+          description:null/*,
+          handTechniqueContent:null,
+          footTechniqueContent:null*/
+        },
+        /*addSymbolValue_Category:'',
         addSymbolValue_Name:'',
-        addSymbolValue_Description:'',
+        addSymbolValue_Description:'',*/
         addSymbolImgBlob:null
        };
   }
@@ -73,7 +82,7 @@ class LabelSelect extends Component<IProps, IState>  {
     if( !this.state.addSymbolInUse ) {
       this.setState( {showInfo:true} );
     }
-    this.props.highlightLabel(this.props.labelRectId);
+    this.props.highlightLabel(this.props.labelId);
   };
 
   private hideInfo = () => {
@@ -86,7 +95,7 @@ class LabelSelect extends Component<IProps, IState>  {
     // give selected symbol id up to parent
     //define side
     console.log("update symbol in labelRect:"+i);
-    this.props.onSelectLabel( this.props.labelRectId, i.id , i);
+    this.props.onSelectLabel( this.props.labelId, i.id , i);
   }
 
   private updateSelectCategory = (i:string) => {
@@ -110,6 +119,9 @@ class LabelSelect extends Component<IProps, IState>  {
     }
   }
 
+  
+
+
   private cancelAddNewSymbol = () => {
     this.setState( {addSymbolInUse: false} );
 
@@ -122,31 +134,34 @@ class LabelSelect extends Component<IProps, IState>  {
     // find act RectLabel
     let rectLabel:LabelRect = null;
     for( let rl of this.props.imageData.labelRects ) {
-        if( rl.id == this.props.labelRectId ) {
+        if( rl.id == this.props.labelId ) {
             rectLabel = rl;
             break;
         }
     }
     if( rectLabel == null ) {
-        console.error( "unable to find act LabelRect in list:"+this.props.labelRectId  );
+        console.error( "unable to find act LabelRect in list:"+this.props.labelId  );
         return null;
     }
     let canvas = this.resizeCropImg( this.props.imageData.fileData, rectLabel.rect );
-    
-    
-    
-    //return canvas;
   }
 
   private finishAddNewSymbol = async () => {
     // create new Symbol object
     //const newSymbolId = Math.max.apply(Math, symbols.map(function(s) { return Number(s.symbolId); })) + 1;
-    let newSymbol:SymbolsContent = {
+    /*let newSymbol:SymbolsContent = {
       id: String(0),
       category:this.state.addSymbolValue_Category,
       name:this.state.addSymbolValue_Name,
       fullname:this.state.addSymbolValue_Category+"/"+this.state.addSymbolValue_Name,
       description:this.state.addSymbolValue_Description,
+      imgUrl:'' // https://www.rd.com/wp-content/uploads/2019/09/GettyImages-621924830.jpg
+    };*/
+
+    let newSymbol:SymbolsContent = {
+      ...this.state.symbolToAdd,
+      id: String(0),
+      fullname:this.state.symbolToAdd.category+"/"+this.state.symbolToAdd.name,
       imgUrl:'' // https://www.rd.com/wp-content/uploads/2019/09/GettyImages-621924830.jpg
     };
 
@@ -176,15 +191,17 @@ class LabelSelect extends Component<IProps, IState>  {
       parentId:symbolsFolderId, 
       file:uploadObj, 
       onProgress:(percent)=>{console.log("fileUpload progress:"+percent);}} );  
-    console.log( response );
+    //console.log( response );
     
     // now add uploaded symbol image to imageSeriesContent
     let newSymbolImageContent : ImageSeriesContent = {
       seriesId: "43",
       imageId: String( newSymbol.id ),
       url: newSymbol.imgUrl,
-      imageMap:'',
-      posture:null,
+      imageMap: '',
+      posture: null,
+      technique: null,
+      sheetRow: -1
     }
     KtkActions.addImageSeriesContentRow( newSymbolImageContent );  
 
@@ -193,6 +210,15 @@ class LabelSelect extends Component<IProps, IState>  {
     this.setState( {actSymbol:newSymbol});
     this.setState( {addSymbolInUse:false} );
     this.setState( {showInfo:true} );
+    this.props.onSelectLabel(this.props.labelId, newSymbol.id, newSymbol);
+    // if new ImageSymbol was of type 'technique' try to prefill technique values from existing bodyPart and posture annotations
+    if( newSymbol.category == SymbolCategory.HAND_TECHNIQUE 
+      || newSymbol.category == SymbolCategory.FOOT_TECHNIQUE
+      || newSymbol.category == SymbolCategory.KUNGFU_TECHNIQUE ) {
+
+        KtkActions.addTechniqueContent(this.props.imageData, this.props.imageData.labelRects.find(r => r.id == this.props.labelId));
+        
+    }
   }
 
   private resizeCropImg = ( srcImg:File, cropArea:IRect ) => {
@@ -279,7 +305,7 @@ class LabelSelect extends Component<IProps, IState>  {
       // get initial value from ktk googlesheet (saved value)
     
       for( let actLabelRect of labelData ) {
-        if( actLabelRect.id == this.props.labelRectId ) {
+        if( actLabelRect.id == this.props.labelId ) {
           side = actLabelRect.side;
           if( this.state.actSymbol == null && this.props.value == null && labelData) {      
             // now find this symbol id in symbols
@@ -296,14 +322,24 @@ class LabelSelect extends Component<IProps, IState>  {
           }
         }
       } 
+
+      let isHighlighted = LabelsSelector.getHighlightedLabelId() == this.props.labelId;
+      const mainStyle = isHighlighted ? {
+        backgroundColor:'red',
+        padding:'1px'
+        
+      } : {};
+
     return ( 
-<div>
+<div style = {mainStyle}>
 { noImageSeriesAssigned && <div style={{color:'red', width:'100%'}} >! Image has no Imageseries ID !<br/>Assign imageseries in filemanager!</div> }
-  {/*selectfield for label category and label*/}   
+  {/*selectfield for label category and label*/}
+  
   <div className="grid-container" style={{display:"inline-grid", width:'100%', gridTemplateColumns: '12% auto 32px', verticalAlign:'top'}} onMouseLeave={this.hideInfo}
           onMouseEnter={!noImageSeriesAssigned && this.showInfo}>
     
     <div style={{ gridColumn: '1 / 3' , gridRow: 1}}>
+      
       <DropdownList style={{fontSize: "small"}}
           name = 'CategorySelect'
           autoFocus 
@@ -316,7 +352,7 @@ class LabelSelect extends Component<IProps, IState>  {
           textField = 'name'
           valueField = 'name'
           onChange={this.updateSelectCategory}
-      />
+      /> 
     </div>
     <div style={{ gridColumn: '2 / 3' , gridRow: 1}}>
       <DropdownList style={{fontSize: "small"}}
@@ -348,12 +384,33 @@ class LabelSelect extends Component<IProps, IState>  {
       {this.state.showMoreAction && <div 
       onMouseLeave={this.hideMoreAction}  
       style={{position: 'relative', zIndex: 102, borderStyle: 'solid', borderColor:Settings.DARK_THEME_THIRD_COLOR, borderWidth:'1px', background:Settings.DARK_THEME_THIRD_COLOR}}>
+        {LabelsSelector.getActiveLabelType() == LabelType.RECT && <ImageButton
+            externalClassName={"trash"}
+            image={"ico/left.png"}
+            imageAlt={"side=L"}
+            buttonSize={{width: 25, height: 25}}
+            onClick={() => this.props.setRectSide(this.props.labelId, Side.LEFT)}
+        />}
+        {LabelsSelector.getActiveLabelType() == LabelType.RECT && <ImageButton
+            externalClassName={"trash"}
+            image={"ico/checkbox-unchecked.png"}
+            imageAlt={"side=NONE"}
+            buttonSize={{width: 25, height: 25}}
+            onClick={() => this.props.setRectSide(this.props.labelId, Side.NONE)}
+        />}
+        {LabelsSelector.getActiveLabelType() == LabelType.RECT && <ImageButton
+            externalClassName={"trash"}
+            image={"ico/right.png"}
+            imageAlt={"side=R"}
+            buttonSize={{width: 25, height: 25}}
+            onClick={() => this.props.setRectSide(this.props.labelId, Side.RIGHT)}
+        />}
         <ImageButton
             externalClassName={"trash"}
             image={"ico/trash.png"}
             imageAlt={"remove_rect"}
             buttonSize={{width: 25, height: 25}}
-            onClick={() => this.props.onDelete(this.props.labelRectId)}
+            onClick={() => this.props.onDelete(this.props.labelId)}
         />
         {!noImageSeriesAssigned && <ImageButton
             externalClassName={"trash"}
@@ -385,21 +442,21 @@ class LabelSelect extends Component<IProps, IState>  {
     <div className="grid-container2" style={{display:"grid", gridTemplateColumns: '70px 200px',}}>
       <div className={'oc-fm--dialog__input-label'} style={{gridColumn: '1 / 2' , gridRow: 1, fontWeight:'normal', color:'#ddd'}}><strong>{"Category: "}</strong></div>
       <DropdownList style={{fontSize: "small", gridColumn: '2 / 2' , gridRow: 1, }}
-          name = {'CategorySelect'+this.props.labelRectId}
+          name = {'CategorySelect'+this.props.labelId}
           suggest  
           data = {categoriesWithoutLeftRight} 
           caseSensitive={false}
           filter='contains'
           textField = 'name'
           valueField = 'name'
-          onSelect = { (i:String) => {this.setState( { addSymbolValue_Category: i} ); } }
+          onSelect = { (i:string) => {this.setState( { symbolToAdd: {...this.state.symbolToAdd, category:i} } ); } }
       />
       <div className={'oc-fm--dialog__input-label'} style={{fontWeight:'normal', color:'#ddd', gridColumn: '1 / 2' , gridRow: 2}}><strong>{"Name: "}</strong></div>
       <div style={{gridColumn: '2 / 2' , gridRow: 2}}>
         <TextInput inputStyle={{ height:'30px'}}
-          key={"newSymbolName"+this.props.labelRectId}
+          key={"newSymbolName"+this.props.labelId}
           isPassword={false}
-          onChange = { (event) => {this.setState( { addSymbolValue_Name: event.target.value} ); } }
+          onChange = { (event) => {this.setState( { symbolToAdd: {...this.state.symbolToAdd, name: event.target.value} } ); } }
           />
       </div>
   
@@ -407,8 +464,9 @@ class LabelSelect extends Component<IProps, IState>  {
       <TextareaAutosize 
         rowsMin={4} 
         style={{width:'100%', gridColumn: '2 / 2' , gridRow: 3}}
-        onChange = { (event) => {this.setState( { addSymbolValue_Description: event.target.value} ); } }
+        onChange = { (event) => {this.setState( { symbolToAdd: {...this.state.symbolToAdd, description: event.target.value} } ); } }
       />
+
     </div>
     <div className={'oc-fm--dialog__input-label'} style={{fontWeight:'normal', color:'#ddd'}}><strong>{"Image: "}</strong></div>
     <canvas ref="canvas" onChange={() => {this.reRender()}}/>
@@ -416,20 +474,20 @@ class LabelSelect extends Component<IProps, IState>  {
       <ImageButton
             externalClassName={"trash"}
             image={"ico/cancel.png"}
-            imageAlt={"remove_rect"}
+            imageAlt={"cancel"}
             buttonSize={{width: 25, height: 25}}
             onClick={() => this.cancelAddNewSymbol()}
         /> 
       <ImageButton
           externalClassName={"trash"}
           image={"ico/ok.png"}
-          imageAlt={"remove_rect"}
+          imageAlt={"add symbol"}
           buttonSize={{width: 25, height: 25}}
           onClick={() => this.finishAddNewSymbol()}
       /> 
     </div>
   </div> 
-
+  
 </div>      
     );
   }

@@ -3,7 +3,7 @@ import {IRect} from "../../interfaces/IRect";
 import {RectUtil} from "../../utils/RectUtil";
 import {DrawUtil} from "../../utils/DrawUtil";
 import {store} from "../..";
-import {ImageData, LabelRect} from "../../store/labels/types";
+import {ImageData, LabelRect, Side} from "../../store/labels/types";
 import {
     updateActiveLabelId,
     updateFirstLabelCreatedFlag,
@@ -167,7 +167,7 @@ export class RectRenderEngine extends BaseRenderEngine {
         const rectOnImage: IRect = RenderEngineUtil.transferRectFromViewPortContentToImage(labelRect.rect, data);
         const highlightedLabelId: string = LabelsSelector.getHighlightedLabelId();
         const displayAsActive: boolean = labelRect.status === LabelStatus.ACCEPTED && labelRect.id === highlightedLabelId;
-        this.renderRect(rectOnImage, displayAsActive);
+        this.renderRect(rectOnImage, displayAsActive, labelRect.side);
     }
 
     private drawActiveRect(labelRect: LabelRect, data: EditorData) {
@@ -179,12 +179,23 @@ export class RectRenderEngine extends BaseRenderEngine {
             rect = RectUtil.resizeRect(rect, this.startResizeRectAnchor.type, delta);
         }
         const rectOnImage: IRect = RectUtil.translate(rect, data.viewPortContentImageRect);
-        this.renderRect(rectOnImage, true);
+        this.renderRect(rectOnImage, true, labelRect.side);
     }
 
-    private renderRect(rectOnImage: IRect, isActive: boolean) {
+    private renderRect(rectOnImage: IRect, isActive: boolean, side: Side) {
         const rectBetweenPixels = RenderEngineUtil.setRectBetweenPixels(rectOnImage);
-        const lineColor: string = isActive ? this.config.lineActiveColor : this.config.lineInactiveColor;
+        //let lineColor: string = isActive ? this.config.lineActiveColor : this.config.lineInactiveColor;
+        let lineColor:string = this.config.lineInactiveColor;
+        if( side ) {
+            switch(side) {
+                case Side.LEFT:
+                    lineColor= this.config.lineColorLeftSide;
+                    break;
+                case Side.RIGHT:
+                    lineColor= this.config.lineColorRightSide;
+                    break;
+            }
+        }
         DrawUtil.drawRect(this.canvas, rectBetweenPixels, lineColor, this.config.lineThickness);
         if (isActive) {
             const handleCenters: IPoint[] = RectUtil.mapRectToAnchors(rectOnImage).map((rectAnchor: RectAnchor) => rectAnchor.position);
