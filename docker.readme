@@ -1,0 +1,4 @@
+docker build -t whitecryst/ktk-commandbridge .
+docker run --name KtK-Commandbridge -p 3002:3000 -d whitecryst/ktk-commandbridge
+docker login
+docker push whitecryst/ktk-commandbridge
