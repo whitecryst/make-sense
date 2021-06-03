@@ -87,11 +87,12 @@ const RectLabelsList: React.FC<IProps> = ({size, imageData, updateImageDataById,
         // upload data to google sheets
         //if(labelRectId && labelNameId && symbol != null) {
             KtkActions.udateImageAnnotation( newImageData ).then( () => {
+                // reload imageSeriesContent to get the new identifies techniques
                 KtkActions.fetchImageSeriesContentRow( newImageData.ktk_imageSeriesContent ).then( () => { 
                     updateImageDataById(imageData.id, newImageData);
                     renderEditorTitle();
                 });
-            }); // reload imageSeriesContent to get the new identifies techniques
+            }); 
         //}
     } 
 

@@ -12,7 +12,6 @@ import { KtkSelector } from '../../../store/selectors/KtkSelector';
 import { Side } from '../../../store/labels/types';
 import { KtkActions } from '../../../logic/actions/KtkActions';
 
-
 const label = 'annotate';
 
 async function handler(apiOptions, actions) {
@@ -184,6 +183,7 @@ async function handler(apiOptions, actions) {
           }
         }
         addImageData( newImageData );
+
       }
     } catch (err) {
       onFailError({

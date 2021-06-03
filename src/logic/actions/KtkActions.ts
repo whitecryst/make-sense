@@ -10,6 +10,8 @@ import {ImageData, LabelName, LabelRect, LabelPoint, Side} from "../../store/lab
 import { toInteger } from "lodash";
 import { convertCompilerOptionsFromJson } from "typescript";
 import {RectUtil} from "../../utils/RectUtil";
+import {updateActivePopupType} from "../../store/general/actionCreators";
+import {PopupWindowType} from "../../data/enums/PopupWindowType";
 
 export class KtkActions {
 
@@ -58,7 +60,7 @@ export class KtkActions {
     }
 
     public static async loadImageSeriesMeta(): Promise<any> {
-        
+        store.dispatch(updateActivePopupType(PopupWindowType.LOADER));
         // get ktk imageSeriesId  from google sheets
         console.log("try to connect to google sheets");
         const { GoogleSpreadsheet } = require('google-spreadsheet');
@@ -104,7 +106,7 @@ export class KtkActions {
         store.dispatch( updateImageSeriesMeta(content) );
         console.log( "KtK ImageSeriesMeta updated" );
             
-          
+        store.dispatch(updateActivePopupType(null));  
     }
 
     public static parsePostureContentString( toParse:string): PostureContent {
@@ -143,7 +145,7 @@ export class KtkActions {
         
     }
     public static async loadImageSeriesContent(): Promise<any> {
-        
+        store.dispatch(updateActivePopupType(PopupWindowType.LOADER));
         // get ktk imageSeriesId  from google sheets
         console.log("try to connect to google sheets");
         const { GoogleSpreadsheet } = require('google-spreadsheet');
@@ -189,10 +191,11 @@ export class KtkActions {
         }
         store.dispatch( updateImageSeriesContent(content) );
         console.log( "KtK ImageSeriesContent updated" );  
-          
+        store.dispatch(updateActivePopupType(null));  
     }
 
     public static async fetchImageSeriesContentRow( imageSeriesContent: ImageSeriesContent ): Promise<ImageSeriesContent> {
+        store.dispatch(updateActivePopupType(PopupWindowType.LOADER));
         // get ktk imageSeriesId  from google sheets
         console.log( "fetchImageSeriesConrentRow: "+imageSeriesContent.sheetRow);
         console.log("try to connect to google sheets");
@@ -237,10 +240,12 @@ export class KtkActions {
         //content.push(imageSeriesContent);
         //store.dispatch( updateImageSeriesContent(content) );
         console.log( "KtK ImageSeriesContentRow fetched" );  
+        store.dispatch(updateActivePopupType(null));
         return imageSeriesContent
     }
 
     public static async udateImageAnnotation( imageData:ImageData ): Promise<any> {
+        store.dispatch(updateActivePopupType(PopupWindowType.LOADER));
         let iSC:ImageSeriesContent = imageData.ktk_imageSeriesContent;
 
         if( iSC.imageId == "0" || iSC.seriesId == "0" ) {
@@ -349,7 +354,7 @@ export class KtkActions {
         await sheet.saveUpdatedCells(); // save all updates in one call
         console.log("...updated immageSeriesContent in sheet!");
         
-        
+        store.dispatch(updateActivePopupType(null));
     }
 
     /**
@@ -358,7 +363,7 @@ export class KtkActions {
      * @param selectedResources 
      */
     public static async upsertImageSeriesContentRow( newImageSeriesMeta:ImageSeriesMeta, selectedResources ): Promise<any> {
-        
+        store.dispatch(updateActivePopupType(PopupWindowType.LOADER));
         console.log("try to connect to google sheets");
         const { GoogleSpreadsheet } = require('google-spreadsheet');
         const creds = require('../../GoogleSheetCredentials.json'); // the file saved above
@@ -444,6 +449,7 @@ export class KtkActions {
                 
             
         }
+        store.dispatch(updateActivePopupType(null));
     }
 
     /**
@@ -452,7 +458,7 @@ export class KtkActions {
      * @param selectedResources 
      */
      public static async addImageSeriesContentRow( newImageSeriesContentRow:ImageSeriesContent ): Promise<any> {
-        
+        store.dispatch(updateActivePopupType(PopupWindowType.LOADER));
         console.log("try to connect to google sheets");
         const { GoogleSpreadsheet } = require('google-spreadsheet');
         const creds = require('../../GoogleSheetCredentials.json'); // the file saved above
@@ -497,10 +503,11 @@ export class KtkActions {
         await sheet.saveUpdatedCells(); // save all updates in one call
         console.log("...updated sheet!");
         // update imageSeriesContent in redux store
-            
+        store.dispatch(updateActivePopupType(null));
     }
 
     public static async LoadSymbolsContent(): Promise<any> {
+        store.dispatch(updateActivePopupType(PopupWindowType.LOADER));
         console.log("try to connect to google sheets");
         const { GoogleSpreadsheet } = require('google-spreadsheet');
         const creds = require('../../GoogleSheetCredentials.json'); // the file saved above
@@ -577,11 +584,11 @@ export class KtkActions {
         store.dispatch( updateSymbolsContent(content) );
         console.log( "KtK SymbolsContent updated" );
         
-        
+        store.dispatch(updateActivePopupType(null));
     };
     
     public static async addSymbolsContentRow( symbolsContentRow:SymbolsContent ): Promise<any> {
-        
+        store.dispatch(updateActivePopupType(PopupWindowType.LOADER));
         console.log("try to connect to google sheets");
         const { GoogleSpreadsheet } = require('google-spreadsheet');
         const creds = require('../../GoogleSheetCredentials.json'); // the file saved above
@@ -646,13 +653,13 @@ export class KtkActions {
         
         store.dispatch( addSymbolsContentRow( symbolsContentRow ) );
         console.log("...updated store!");
-                
+        store.dispatch(updateActivePopupType(null));        
         return newSymbolId;    
         
     }
 
     public static async addTechniqueContent( imageData:ImageData, newTechniqueRectLabel:LabelRect ) {
-
+        store.dispatch(updateActivePopupType(PopupWindowType.LOADER));
         const techniqueRects: LabelRect[] = [];
         for( let actRectLabel of imageData.labelRects ) {
             if( actRectLabel.id != newTechniqueRectLabel.id 
@@ -673,7 +680,7 @@ export class KtkActions {
                 
                 break;
         }
-        
+        store.dispatch(updateActivePopupType(null));
     }
 
     private static async addHandTechniqueContentFromRects(techniqueRect:LabelRect, imageData: ImageData ) {

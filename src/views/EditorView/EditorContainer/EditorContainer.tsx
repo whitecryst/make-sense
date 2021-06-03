@@ -189,13 +189,13 @@ const EditorContainer: React.FC<IProps> = (
                 />}
                 <div style={{color:'white', fontSize:'small', fontWeight:'normal', textAlign:'left'}}>
                     {imagesData[activeImageIndex] && imagesData[activeImageIndex].ktk_imageSeriesContent.technique && imagesData[activeImageIndex].ktk_imageSeriesContent.technique.footTechnique && <div>
-                        Feet: {imagesData[activeImageIndex].ktk_imageSeriesContent.technique.footTechnique.replaceAll(" ///  ///","")}</div>}
+                        Feet: {imagesData[activeImageIndex].ktk_imageSeriesContent.technique.footTechnique.replace(" ///  ///","")}</div>}
 
                     {imagesData[activeImageIndex] && imagesData[activeImageIndex].ktk_imageSeriesContent.technique && imagesData[activeImageIndex].ktk_imageSeriesContent.technique.handTechnique && <div>
-                        Hands: {imagesData[activeImageIndex].ktk_imageSeriesContent.technique.handTechnique.replaceAll(" ///  ///","")}</div>}
+                        Hands: {imagesData[activeImageIndex].ktk_imageSeriesContent.technique.handTechnique.replace(" ///  ///","")}</div>}
 
                     {imagesData[activeImageIndex] && imagesData[activeImageIndex].ktk_imageSeriesContent.technique && imagesData[activeImageIndex].ktk_imageSeriesContent.technique.kungfuTechnique && <div>
-                    Technique: {imagesData[activeImageIndex].ktk_imageSeriesContent.technique.kungfuTechnique.replaceAll(" ///  ///","")}</div>}
+                    Technique: {imagesData[activeImageIndex].ktk_imageSeriesContent.technique.kungfuTechnique.replace(" ///  ///","")}</div>}
                 </div>
                 <Editor
                     size={calculateEditorSize()}

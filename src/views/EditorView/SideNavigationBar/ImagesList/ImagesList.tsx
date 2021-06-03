@@ -12,6 +12,8 @@ import {ContextType} from "../../../../data/enums/ContextType";
 import {ImageActions} from "../../../../logic/actions/ImageActions";
 import {EventType} from "../../../../data/enums/EventType";
 import {LabelStatus} from "../../../../data/enums/LabelStatus";
+import {store} from "../../../../index";
+import {updateActiveLabelType} from "../../../../store/labels/actionCreators";
 
 interface IProps {
     activeImageIndex: number;
@@ -78,6 +80,7 @@ class ImagesList extends React.Component<IProps, IState> {
 
     private onClickHandler = (index: number) => {
         ImageActions.getImageByIndex(index)
+        store.dispatch(updateActiveLabelType(LabelType.RECT));
     };
 
     private renderImagePreview = (index: number, isScrolling: boolean, isVisible: boolean, style: React.CSSProperties) => {
